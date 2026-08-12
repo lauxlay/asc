@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Volume de données Phase 0 (ADR-001/ADR-002) : jamais versionné
+data/
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+*.log
+
+.claude/settings.local.json

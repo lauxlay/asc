@@ -27,7 +27,7 @@ SaaS de gestion/maintenance/intervention d'ascenseurs pour PME ascensoristes, sy
 - Code en anglais, glossaire FR→EN figé dans `docs/03-application/03-modele-donnees.md` (`appareil`=`unit`, `visite`=`maintenance_visit`, `carnet`=`logbook`…).
 - Zod à toutes les frontières ; logique métier pure dans `packages/domain` (zéro dépendance framework).
 - Dépendances : `apps/* → contracts → domain` ; jamais d'import entre apps.
-- Commits conventionnels ; `pnpm check` = lint + typecheck + test + build = exactement ce que fait la CI (`pnpm fix` pour auto-corriger le lint/format).
+- Commits conventionnels ; `pnpm check` = lint + typecheck + test + build et `pnpm e2e` = suite Playwright complète — les deux réunis sont exactement ce que fait la CI (`pnpm fix` pour auto-corriger le lint/format). `pnpm e2e` est séparé parce qu'il exige les navigateurs Playwright (`pnpm --filter @asc/web exec playwright install chromium`).
 - **Un lot = une branche `feat/lN-M-nom` = une PR** ; merge uniquement CI verte + review ; jamais de commit direct sur `main`.
 - Cycle de dev par lot (`docs/03-application/09-decoupage-execution-opus.md`) : feature → intégration UI → **e2e navigateur Playwright du parcours** → suite de régression complète verte → review. Non négociable. Design : shadcn/ui par défaut, zéro custom tant qu'un défaut suffit.
 - Multi-agents : périmètres et workflow dans `docs/03-application/08-organisation-multi-agents.md`. Ne pas sortir de son périmètre.

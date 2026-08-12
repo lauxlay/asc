@@ -10,6 +10,7 @@
   },
   "scripts": {
     "check": "turbo run lint typecheck test build",
+    "e2e": "turbo run e2e",
     "lint": "biome ci .",
     "fix": "biome check --write .",
     "typecheck": "turbo run typecheck",

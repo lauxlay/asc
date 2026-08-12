@@ -27,3 +27,38 @@ jobs:
 
       # Exactement la commande locale : lint + typecheck + test + build.
       - run: pnpm check
+
+  e2e:
+    name: pnpm e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Cache des navigateurs Playwright
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - run: pnpm --filter @asc/web exec playwright install --with-deps chromium
+
+      # La suite de régression e2e complète, cumulative : chaque lot y ajoute
+      # ses parcours et l'ensemble tourne sur chaque PR.
+      - run: pnpm e2e
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-playwright
+          path: apps/web/playwright-report/
+          retention-days: 7

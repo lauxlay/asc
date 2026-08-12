@@ -6,7 +6,7 @@
  * tests et les outils ont besoin.
  */
 
-export { AppModule } from "./app.module.js";
+export { AppModule, createAppModule } from "./app.module.js";
 export { DEFAULT_TENANT_ID } from "./auth/auth.service.js";
 export { hashPassword, verifyPassword } from "./auth/password.js";
 export { UNIT_REPOSITORY, USER_REPOSITORY } from "./common/tokens.js";

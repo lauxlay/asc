@@ -21,40 +21,39 @@ import { JsonCollectionStore } from "./storage/json-collection-store.js";
  * les trois lignes de `useFactory` changent (ADR-001).
  */
 @Module({})
-// biome-ignore lint/complexity/noStaticOnlyClass: module dynamique NestJS — la classe est la
-// référence attendue par `DynamicModule.module`, la fabrique statique est la convention du framework.
-export class AppModule {
-  static forConfig(config: ApiConfig): DynamicModule {
-    return {
-      module: AppModule,
-      imports: [
-        JwtModule.register({
-          secret: config.JWT_SECRET,
-          signOptions: { expiresIn: config.JWT_EXPIRES_IN },
-        }),
-      ],
-      controllers: [AuthController, UnitsController],
-      providers: [
-        { provide: API_CONFIG, useValue: config },
-        {
-          provide: JsonCollectionStore,
-          useFactory: () => new JsonCollectionStore(config.DATA_DIR),
-        },
-        {
-          provide: UNIT_REPOSITORY,
-          useFactory: (store: JsonCollectionStore) => new JsonUnitRepository(store),
-          inject: [JsonCollectionStore],
-        },
-        {
-          provide: USER_REPOSITORY,
-          useFactory: (store: JsonCollectionStore) => new JsonUserRepository(store),
-          inject: [JsonCollectionStore],
-        },
-        AuthService,
-        UnitsService,
-        { provide: APP_GUARD, useClass: JwtAuthGuard },
-        { provide: APP_FILTER, useClass: DomainExceptionFilter },
-      ],
-    };
-  }
+export class AppModule {}
+
+/** Construit le module racine à partir d'une configuration validée. */
+export function createAppModule(config: ApiConfig): DynamicModule {
+  return {
+    module: AppModule,
+    imports: [
+      JwtModule.register({
+        secret: config.JWT_SECRET,
+        signOptions: { expiresIn: config.JWT_EXPIRES_IN },
+      }),
+    ],
+    controllers: [AuthController, UnitsController],
+    providers: [
+      { provide: API_CONFIG, useValue: config },
+      {
+        provide: JsonCollectionStore,
+        useFactory: () => new JsonCollectionStore(config.DATA_DIR),
+      },
+      {
+        provide: UNIT_REPOSITORY,
+        useFactory: (store: JsonCollectionStore) => new JsonUnitRepository(store),
+        inject: [JsonCollectionStore],
+      },
+      {
+        provide: USER_REPOSITORY,
+        useFactory: (store: JsonCollectionStore) => new JsonUserRepository(store),
+        inject: [JsonCollectionStore],
+      },
+      AuthService,
+      UnitsService,
+      { provide: APP_GUARD, useClass: JwtAuthGuard },
+      { provide: APP_FILTER, useClass: DomainExceptionFilter },
+    ],
+  };
 }

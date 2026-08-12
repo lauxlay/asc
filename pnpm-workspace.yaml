@@ -9,6 +9,7 @@ catalog:
   turbo: ^2.10.9
   typescript: ~5.9.3
   vitest: ^4.1.10
+  zod: ^4.4.3
 
 minimumReleaseAgeExclude:
   - '@biomejs/biome@2.5.8'

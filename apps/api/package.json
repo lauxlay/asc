@@ -13,14 +13,18 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "@asc/contracts": "workspace:*",
-    "@asc/domain": "workspace:*"
+    "@asc/domain": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@asc/config": "workspace:*",
-    "typescript": "catalog:"
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

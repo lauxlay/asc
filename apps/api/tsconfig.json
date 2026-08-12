@@ -1,7 +1,13 @@
 {
   "extends": "@asc/config/tsconfig/base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    // NestJS repose sur les décorateurs « legacy ». On n'active PAS
+    // `emitDecoratorMetadata` : chaque injection passe par un jeton explicite
+    // (`@Inject(...)`), ce qui garde le câblage lisible et permet à Vitest
+    // (esbuild) de compiler les tests sans transformeur supplémentaire.
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
   },
   "include": ["src/**/*.ts"]
 }

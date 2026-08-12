@@ -29,5 +29,13 @@ export {
   isLeapYear,
   isoDate,
 } from "./date/iso-date.js";
-export type { Contract, Id, MaintenanceVisit, Unit } from "./entities.js";
+export {
+  type Contract,
+  type Id,
+  type MaintenanceVisit,
+  type Unit,
+  USER_ROLES,
+  type User,
+  type UserRole,
+} from "./entities.js";
 export { DomainError } from "./errors.js";

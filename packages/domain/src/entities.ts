@@ -11,6 +11,24 @@ import type { IsoDate } from "./date/iso-date.js";
 /** Identifiant applicatif (UUID généré par l'app, jamais un auto-increment — ADR-001). */
 export type Id = string;
 
+/** Rôles applicatifs (`docs/03-application/03-modele-donnees.md`). */
+export const USER_ROLES = ["admin", "dispatcher", "technician", "accountant"] as const;
+
+export type UserRole = (typeof USER_ROLES)[number];
+
+/**
+ * Utilisateur de la société de maintenance.
+ *
+ * Le domaine connaît l'identité et le rôle, jamais les identifiants secrets :
+ * le mot de passe haché est un détail de la couche de persistance.
+ */
+export interface User {
+  readonly id: Id;
+  readonly tenantId: Id;
+  readonly email: string;
+  readonly role: UserRole;
+}
+
 /** Appareil (ascenseur). */
 export interface Unit {
   readonly id: Id;

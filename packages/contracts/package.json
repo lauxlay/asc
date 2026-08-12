@@ -16,7 +16,8 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@asc/domain": "workspace:*"
+    "@asc/domain": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@asc/config": "workspace:*",

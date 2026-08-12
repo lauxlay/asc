@@ -24,6 +24,11 @@
       "inputs": ["src/**", "tsconfig*.json"],
       "outputs": ["dist/**"]
     },
+    "e2e": {
+      "dependsOn": ["^build", "build"],
+      "inputs": ["src/**", "e2e/**", "playwright.config.ts"],
+      "cache": false
+    },
     "dev": {
       "cache": false,
       "persistent": true

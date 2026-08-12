@@ -3,25 +3,41 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json"
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json",
+    "dev": "vite",
+    "preview": "vite preview",
+    "e2e": "playwright test",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@asc/contracts": "workspace:*",
     "@asc/domain": "workspace:*",
-    "@asc/ui": "workspace:*"
+    "@asc/ui": "workspace:*",
+    "@radix-ui/react-label": "^2.1.9",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@tanstack/react-query": "^5.101.4",
+    "@tanstack/react-router": "^1.170.27",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.31.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwind-merge": "^3.4.1",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@asc/config": "workspace:*",
-    "typescript": "catalog:"
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "catalog:",
+    "vite": "^8.2.1",
+    "vite-plugin-pwa": "^1.3.0",
+    "workbox-window": "^7.4.1"
   }
 }

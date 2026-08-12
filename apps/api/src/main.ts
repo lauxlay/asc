@@ -3,14 +3,14 @@ import "reflect-metadata";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
-import { AppModule } from "./app.module.js";
+import { createAppModule } from "./app.module.js";
 import { loadConfig } from "./config/env.js";
 
 async function bootstrap(): Promise<void> {
   const config = loadConfig();
 
   const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule.forConfig(config),
+    createAppModule(config),
     new FastifyAdapter(),
   );
 

@@ -1,9 +1,11 @@
 import {
   type CreateUnitRequest,
   createUnitRequestSchema,
+  type UnitListQuery,
   type UnitListResponse,
   type UnitResponse,
   type UpdateUnitRequest,
+  unitListQuerySchema,
   updateUnitRequestSchema,
 } from "@asc/contracts";
 import {
@@ -17,6 +19,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from "@nestjs/common";
 import type { JwtPayload } from "../../auth/auth.service.js";
 import { CurrentUser } from "../../auth/current-user.decorator.js";
@@ -32,8 +35,11 @@ export class UnitsController {
   constructor(@Inject(UnitsService) private readonly units: UnitsService) {}
 
   @Get()
-  async list(@CurrentUser() user: JwtPayload): Promise<UnitListResponse> {
-    return { items: [...(await this.units.list(user.tenantId))] };
+  async list(
+    @CurrentUser() user: JwtPayload,
+    @Query(new ZodValidationPipe(unitListQuerySchema)) query: UnitListQuery,
+  ): Promise<UnitListResponse> {
+    return { items: [...(await this.units.list(user.tenantId, query.siteId))] };
   }
 
   @Get(":id")

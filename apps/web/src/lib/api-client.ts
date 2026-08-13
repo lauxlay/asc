@@ -1,9 +1,17 @@
 import {
+  type CreateSiteRequest,
+  type CreateUnitRequest,
   type LoginRequest,
   type LoginResponse,
   loginResponseSchema,
+  type SiteListResponse,
+  type SiteResponse,
+  siteListResponseSchema,
+  siteResponseSchema,
   type UnitListResponse,
+  type UnitResponse,
   unitListResponseSchema,
+  unitResponseSchema,
 } from "@asc/contracts";
 import type { ZodType } from "zod";
 
@@ -84,6 +92,26 @@ export function login(credentials: LoginRequest): Promise<LoginResponse> {
   return request("/auth/login", loginResponseSchema, { method: "POST", body: credentials });
 }
 
-export function listUnits(token: string): Promise<UnitListResponse> {
-  return request("/units", unitListResponseSchema, { token });
+/** `query` vide rend tout le parc (spec 002, R2.4). */
+export function listSites(token: string, query = ""): Promise<SiteListResponse> {
+  const search = query === "" ? "" : `?q=${encodeURIComponent(query)}`;
+  return request(`/sites${search}`, siteListResponseSchema, { token });
+}
+
+export function getSite(token: string, siteId: string): Promise<SiteResponse> {
+  return request(`/sites/${encodeURIComponent(siteId)}`, siteResponseSchema, { token });
+}
+
+export function createSite(token: string, site: CreateSiteRequest): Promise<SiteResponse> {
+  return request("/sites", siteResponseSchema, { method: "POST", body: site, token });
+}
+
+/** `siteId` restreint la liste aux appareils d'un immeuble. */
+export function listUnits(token: string, siteId?: string): Promise<UnitListResponse> {
+  const search = siteId === undefined ? "" : `?siteId=${encodeURIComponent(siteId)}`;
+  return request(`/units${search}`, unitListResponseSchema, { token });
+}
+
+export function createUnit(token: string, unit: CreateUnitRequest): Promise<UnitResponse> {
+  return request("/units", unitResponseSchema, { method: "POST", body: unit, token });
 }

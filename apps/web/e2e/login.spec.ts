@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { DEMO_EMAIL, DEMO_PASSWORD, signIn } from "./support/session";
 
 /**
  * Parcours de connexion du dispatcher — premier test de la suite de régression
@@ -8,30 +9,22 @@ import { expect, test } from "@playwright/test";
  * voit son parc », jamais « POST /auth/login renvoie 200 ».
  */
 
-const DEMO_EMAIL = "dispatcher@ascenseur.test";
-const DEMO_PASSWORD = "ascenseur-demo-2026";
-
-async function signIn(page: import("@playwright/test").Page, password: string): Promise<void> {
-  await page.getByLabel("Email").fill(DEMO_EMAIL);
-  await page.getByLabel("Mot de passe").fill(password);
-  await page.getByRole("button", { name: "Se connecter" }).click();
-}
-
 test("le dispatcher se connecte et voit le parc de sa société", async ({ page }) => {
   await page.goto("/");
 
   // Non connecté : on atterrit sur la connexion, pas sur le parc.
   await expect(page).toHaveURL(/\/login/);
 
-  await signIn(page, DEMO_PASSWORD);
+  await signIn(page);
 
   await expect(page).toHaveURL("http://127.0.0.1:4173/");
   await expect(page.getByRole("heading", { name: "Parc" })).toBeVisible();
   await expect(page.getByTestId("session-email")).toHaveText(DEMO_EMAIL);
 
-  // Les deux appareils du jeu de démonstration.
-  await expect(page.getByTestId("units-list").getByRole("listitem")).toHaveCount(2);
-  await expect(page.getByText("site-demo-1")).toBeVisible();
+  // Les deux immeubles du jeu de démonstration. Pas de comptage absolu : la
+  // suite tourne en parallèle et d'autres parcours créent des sites.
+  await expect(page.getByText("Résidence Les Tilleuls")).toBeVisible();
+  await expect(page.getByText("Le Clos Fleuri")).toBeVisible();
 });
 
 test("un mot de passe faux laisse le dispatcher sur la page de connexion", async ({ page }) => {

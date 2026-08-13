@@ -33,9 +33,11 @@ export {
   type Contract,
   type Id,
   type MaintenanceVisit,
+  type Site,
   type Unit,
   USER_ROLES,
   type User,
   type UserRole,
 } from "./entities.js";
 export { DomainError } from "./errors.js";
+export { normalizeSearchText, siteMatchesQuery } from "./sites/site-search.js";

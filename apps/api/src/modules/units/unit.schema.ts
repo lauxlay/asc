@@ -17,6 +17,7 @@ export const unitSchema = z.object({
   id: z.string().min(1),
   tenantId: z.string().min(1),
   siteId: z.string().min(1),
+  reference: z.string().min(1),
   commissionedOn: isoDateSchema.nullable(),
   lastStatutoryInspectionOn: isoDateSchema.nullable(),
 }) satisfies z.ZodType<Unit>;

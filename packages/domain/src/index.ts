@@ -54,8 +54,21 @@ export {
   USER_ROLES,
   type User,
   type UserRole,
+  WORK_ORDER_PRIORITIES,
+  WORK_ORDER_STATUSES,
+  WORK_ORDER_TYPES,
+  type WorkOrder,
+  type WorkOrderPriority,
+  type WorkOrderStatus,
+  type WorkOrderType,
 } from "./entities.js";
 export { DomainError } from "./errors.js";
+export {
+  allowedTransitionsFrom,
+  canTransition,
+  formatWorkOrderReference,
+  isTerminalStatus,
+} from "./work-orders/status-transitions.js";
 export {
   type ColumnMapping,
   duplicatedColumns,

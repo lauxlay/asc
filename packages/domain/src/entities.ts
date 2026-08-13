@@ -126,6 +126,52 @@ export const CONTRACT_TYPES = ["minimal", "extended"] as const;
 
 export type ContractType = (typeof CONTRACT_TYPES)[number];
 
+/**
+ * Types d'ordre de travail (spec 007, R2).
+ *
+ * Le modèle de données prévoit aussi `works` et `inspection` : ils arriveront
+ * avec les features qui les produisent (devis→travaux en L3.1, contrôle
+ * technique en L2.6). Les déclarer vides maintenant serait spéculatif.
+ */
+export const WORK_ORDER_TYPES = ["visit", "breakdown", "repair"] as const;
+
+export type WorkOrderType = (typeof WORK_ORDER_TYPES)[number];
+
+/** Statuts d'un ordre de travail. `done` et `cancelled` sont terminaux (R3.2). */
+export const WORK_ORDER_STATUSES = ["new", "in_progress", "done", "cancelled"] as const;
+
+export type WorkOrderStatus = (typeof WORK_ORDER_STATUSES)[number];
+
+/**
+ * Criticité. `entrapment` — personne bloquée en cabine — est le P0 du produit,
+ * la seule criticité qui porte la couleur d'alerte
+ * (`docs/02-produit/07-principes-ux.md`, règle 4).
+ */
+export const WORK_ORDER_PRIORITIES = ["entrapment", "urgent", "normal"] as const;
+
+export type WorkOrderPriority = (typeof WORK_ORDER_PRIORITIES)[number];
+
+/**
+ * Ordre de travail : l'unité de production de l'ascensoriste.
+ *
+ * Pas d'`assignee` ni de `scheduledAt` à ce stade : ils arrivent avec le
+ * planning qui les remplit (L1.7). Un champ vide que rien n'écrit serait un
+ * champ mort.
+ */
+export interface WorkOrder {
+  readonly id: Id;
+  readonly tenantId: Id;
+  /** Numéro lisible « OT-000042 » : un UUID ne se cite pas au téléphone. */
+  readonly reference: string;
+  readonly type: WorkOrderType;
+  readonly status: WorkOrderStatus;
+  readonly priority: WorkOrderPriority;
+  readonly unitId: Id;
+  /** Ce que dit l'appelant, en une ligne. */
+  readonly summary: string;
+  readonly createdOn: IsoDate;
+}
+
 /** Visite périodique. `completedOn` à `null` = planifiée, pas encore réalisée. */
 export interface MaintenanceVisit {
   readonly id: Id;

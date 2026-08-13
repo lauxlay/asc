@@ -2,17 +2,24 @@ import {
   type AnalyzeImportResponse,
   analyzeImportResponseSchema,
   type CommitImportResponse,
+  type ComplianceDeadlineListResponse,
   type ContactListResponse,
   type ContactResponse,
+  type ContractListResponse,
+  type ContractResponse,
   type CreateContactRequest,
+  type CreateContractRequest,
   type CreateCustomerRequest,
   type CreateSiteRequest,
   type CreateUnitRequest,
   type CustomerListResponse,
   type CustomerResponse,
   commitImportResponseSchema,
+  complianceDeadlineListResponseSchema,
   contactListResponseSchema,
   contactResponseSchema,
+  contractListResponseSchema,
+  contractResponseSchema,
   customerListResponseSchema,
   customerResponseSchema,
   type ImportIssue,
@@ -211,6 +218,50 @@ export function listUnits(token: string, siteId?: string): Promise<UnitListRespo
 
 export function createUnit(token: string, unit: CreateUnitRequest): Promise<UnitResponse> {
   return request("/units", unitResponseSchema, { method: "POST", body: unit, token });
+}
+
+export function listContracts(token: string): Promise<ContractListResponse> {
+  return request("/contracts", contractListResponseSchema, { token });
+}
+
+export function getContract(token: string, contractId: string): Promise<ContractResponse> {
+  return request(`/contracts/${encodeURIComponent(contractId)}`, contractResponseSchema, { token });
+}
+
+export function createContract(
+  token: string,
+  contract: CreateContractRequest,
+): Promise<ContractResponse> {
+  return request("/contracts", contractResponseSchema, {
+    method: "POST",
+    body: contract,
+    token,
+  });
+}
+
+/** Remplace la liste des appareils couverts par le contrat. */
+export function setContractUnits(
+  token: string,
+  contractId: string,
+  unitIds: readonly string[],
+): Promise<ContractResponse> {
+  return request(`/contracts/${encodeURIComponent(contractId)}`, contractResponseSchema, {
+    method: "PATCH",
+    body: { unitIds },
+    token,
+  });
+}
+
+/** Échéances calculées à la demande par le moteur du lot L0.2 (spec 005, R4). */
+export function listContractDeadlines(
+  token: string,
+  contractId: string,
+): Promise<ComplianceDeadlineListResponse> {
+  return request(
+    `/contracts/${encodeURIComponent(contractId)}/deadlines`,
+    complianceDeadlineListResponseSchema,
+    { token },
+  );
 }
 
 /** Analyse un CSV sans rien écrire. `mapping` à `null` = laisser deviner. */

@@ -9,6 +9,8 @@ import {
 import { OfflineBanner } from "@/components/offline-banner";
 import { PwaUpdatePrompt } from "@/components/pwa-update-prompt";
 import { getSession, signOut, useSession } from "@/lib/auth";
+import { ContractDetailPage } from "@/pages/contract-detail-page";
+import { ContractsPage } from "@/pages/contracts-page";
 import { CustomerDetailPage } from "@/pages/customer-detail-page";
 import { CustomersPage } from "@/pages/customers-page";
 import { ImportPage } from "@/pages/import-page";
@@ -67,6 +69,12 @@ function AuthenticatedLayout(): React.JSX.Element {
               Clients
             </Link>
             <Link
+              to="/contrats"
+              className="text-sm text-[var(--color-muted-foreground)] hover:underline"
+            >
+              Contrats
+            </Link>
+            <Link
               to="/import"
               className="text-sm text-[var(--color-muted-foreground)] hover:underline"
             >
@@ -121,6 +129,18 @@ const customerDetailRoute = createRoute({
   component: CustomerDetailPage,
 });
 
+const contractsRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/contrats",
+  component: ContractsPage,
+});
+
+const contractDetailRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/contrats/$contractId",
+  component: ContractDetailPage,
+});
+
 const importRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: "/import",
@@ -147,6 +167,8 @@ const routeTree = rootRoute.addChildren([
     siteDetailRoute,
     customersRoute,
     customerDetailRoute,
+    contractsRoute,
+    contractDetailRoute,
     importRoute,
   ]),
   loginRoute,

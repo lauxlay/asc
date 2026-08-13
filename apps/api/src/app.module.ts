@@ -7,6 +7,7 @@ import { JwtAuthGuard } from "./auth/jwt-auth.guard.js";
 import { DomainExceptionFilter } from "./common/domain-exception.filter.js";
 import {
   CONTACT_REPOSITORY,
+  CONTRACT_REPOSITORY,
   CUSTOMER_REPOSITORY,
   SITE_REPOSITORY,
   UNIT_REPOSITORY,
@@ -17,6 +18,9 @@ import { HealthController } from "./health/health.controller.js";
 import { ContactsController } from "./modules/contacts/contacts.controller.js";
 import { ContactsService } from "./modules/contacts/contacts.service.js";
 import { JsonContactRepository } from "./modules/contacts/json-contact.repository.js";
+import { ContractsController } from "./modules/contracts/contracts.controller.js";
+import { ContractsService } from "./modules/contracts/contracts.service.js";
+import { JsonContractRepository } from "./modules/contracts/json-contract.repository.js";
 import { CustomersController } from "./modules/customers/customers.controller.js";
 import { CustomersService } from "./modules/customers/customers.service.js";
 import { JsonCustomerRepository } from "./modules/customers/json-customer.repository.js";
@@ -54,6 +58,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
     controllers: [
       AuthController,
       ContactsController,
+      ContractsController,
       CustomersController,
       HealthController,
       ParcImportController,
@@ -69,6 +74,11 @@ export function createAppModule(config: ApiConfig): DynamicModule {
       {
         provide: CONTACT_REPOSITORY,
         useFactory: (store: JsonCollectionStore) => new JsonContactRepository(store),
+        inject: [JsonCollectionStore],
+      },
+      {
+        provide: CONTRACT_REPOSITORY,
+        useFactory: (store: JsonCollectionStore) => new JsonContractRepository(store),
         inject: [JsonCollectionStore],
       },
       {
@@ -93,6 +103,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
       },
       AuthService,
       ContactsService,
+      ContractsService,
       CustomersService,
       ParcImportService,
       SitesService,

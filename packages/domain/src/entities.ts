@@ -112,12 +112,19 @@ export interface Unit {
 export interface Contract {
   readonly id: Id;
   readonly tenantId: Id;
-  readonly type: "minimal" | "extended";
+  /** Numéro de contrat : « CT-2026-014 ». Non unique, comme les repères d'appareils. */
+  readonly reference: string;
+  readonly type: ContractType;
   readonly unitIds: readonly Id[];
   readonly startsOn: IsoDate;
   /** `null` = en cours (tacite reconduction). */
   readonly endsOn: IsoDate | null;
 }
+
+/** Contrats types de l'arrêté du 7 novembre 2012. */
+export const CONTRACT_TYPES = ["minimal", "extended"] as const;
+
+export type ContractType = (typeof CONTRACT_TYPES)[number];
 
 /** Visite périodique. `completedOn` à `null` = planifiée, pas encore réalisée. */
 export interface MaintenanceVisit {

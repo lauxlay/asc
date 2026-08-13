@@ -11,6 +11,7 @@ import { PwaUpdatePrompt } from "@/components/pwa-update-prompt";
 import { getSession, signOut, useSession } from "@/lib/auth";
 import { CustomerDetailPage } from "@/pages/customer-detail-page";
 import { CustomersPage } from "@/pages/customers-page";
+import { ImportPage } from "@/pages/import-page";
 import { LoginPage } from "@/pages/login-page";
 import { SiteDetailPage } from "@/pages/site-detail-page";
 import { SitesPage } from "@/pages/sites-page";
@@ -65,6 +66,12 @@ function AuthenticatedLayout(): React.JSX.Element {
             >
               Clients
             </Link>
+            <Link
+              to="/import"
+              className="text-sm text-[var(--color-muted-foreground)] hover:underline"
+            >
+              Import
+            </Link>
           </nav>
           <div className="flex items-center gap-3">
             <span data-testid="session-email" className="text-sm">
@@ -114,6 +121,12 @@ const customerDetailRoute = createRoute({
   component: CustomerDetailPage,
 });
 
+const importRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/import",
+  component: ImportPage,
+});
+
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/login",
@@ -134,6 +147,7 @@ const routeTree = rootRoute.addChildren([
     siteDetailRoute,
     customersRoute,
     customerDetailRoute,
+    importRoute,
   ]),
   loginRoute,
 ]);

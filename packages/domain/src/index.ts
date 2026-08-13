@@ -44,4 +44,22 @@ export {
   type UserRole,
 } from "./entities.js";
 export { DomainError } from "./errors.js";
+export {
+  type ColumnMapping,
+  duplicatedColumns,
+  IMPORT_FIELDS,
+  type ImportField,
+  missingRequiredFields,
+  REQUIRED_IMPORT_FIELDS,
+  suggestColumnMapping,
+} from "./import/column-mapping.js";
+export { type CsvRow, type CsvSeparator, type CsvTable, parseCsv } from "./import/csv.js";
+export {
+  buildImportPlan,
+  type ImportIssue,
+  type ImportPlan,
+  type PlannedSite,
+  type PlannedUnit,
+  siteKeyOf,
+} from "./import/import-plan.js";
 export { normalizeSearchText, siteMatchesQuery } from "./sites/site-search.js";

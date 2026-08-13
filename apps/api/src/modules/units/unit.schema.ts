@@ -17,7 +17,12 @@ export const unitSchema = z.object({
   id: z.string().min(1),
   tenantId: z.string().min(1),
   siteId: z.string().min(1),
-  reference: z.string().min(1),
+  /**
+   * Ajouté au lot L1.1 : absent des fichiers écrits avant. Le défaut est une
+   * valeur visiblement provisoire, à corriger par l'utilisateur — inventer un
+   * repère plausible serait pire que d'avouer qu'on ne le connaît pas.
+   */
+  reference: z.string().min(1).default("Sans repère"),
   commissionedOn: isoDateSchema.nullable(),
   lastStatutoryInspectionOn: isoDateSchema.nullable(),
 }) satisfies z.ZodType<Unit>;

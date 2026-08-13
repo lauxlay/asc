@@ -15,6 +15,15 @@ export {
   VISIT_INTERVAL_WEEKS,
 } from "./compliance/deadlines.js";
 export {
+  type CoveragePeriod,
+  conflictingUnitIds,
+  duplicatedUnitIds,
+  hasLegalDuration,
+  isActiveOn,
+  MINIMUM_CONTRACT_YEARS,
+  periodsOverlap,
+} from "./contracts/contract-rules.js";
+export {
   addDays,
   addMonths,
   addWeeks,
@@ -30,8 +39,10 @@ export {
   isoDate,
 } from "./date/iso-date.js";
 export {
+  CONTRACT_TYPES,
   type Contact,
   type Contract,
+  type ContractType,
   CUSTOMER_TYPES,
   type Customer,
   type CustomerType,

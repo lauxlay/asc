@@ -31,6 +31,7 @@ function makeContract(overrides: Partial<Contract> = {}): Contract {
   return {
     id: "contract-1",
     tenantId: TENANT,
+    reference: "CT-2026-001",
     type: "minimal",
     unitIds: [UNIT_ID],
     startsOn: isoDate("2026-01-01"),

@@ -78,8 +78,11 @@ test("le dispatcher crée un site, y ajoute un appareil et le retrouve par son a
 test("la recherche ignore la casse et les accents de l'adresse", async ({ page }) => {
   await openParc(page);
 
-  // « Tilleuls » vient du jeu de démonstration, à Lyon.
-  await page.getByLabel("Rechercher une adresse").fill("LYON");
+  // « Résidence Les Tilleuls » vient du jeu de démonstration. On le cherche en
+  // majuscules et sans accent : la requête doit quand même le trouver.
+  // Volontairement pas une recherche par ville — d'autres parcours de la suite
+  // créent des immeubles, et seul ce nom leur est étranger.
+  await page.getByLabel("Rechercher une adresse").fill("RESIDENCE LES TILLEULS");
 
   const results = page.getByTestId("sites-list").getByRole("listitem");
   await expect(results).toHaveCount(1);

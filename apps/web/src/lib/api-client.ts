@@ -1,6 +1,16 @@
 import {
+  type ContactListResponse,
+  type ContactResponse,
+  type CreateContactRequest,
+  type CreateCustomerRequest,
   type CreateSiteRequest,
   type CreateUnitRequest,
+  type CustomerListResponse,
+  type CustomerResponse,
+  contactListResponseSchema,
+  contactResponseSchema,
+  customerListResponseSchema,
+  customerResponseSchema,
   type LoginRequest,
   type LoginResponse,
   loginResponseSchema,
@@ -96,6 +106,63 @@ export function login(credentials: LoginRequest): Promise<LoginResponse> {
 export function listSites(token: string, query = ""): Promise<SiteListResponse> {
   const search = query === "" ? "" : `?q=${encodeURIComponent(query)}`;
   return request(`/sites${search}`, siteListResponseSchema, { token });
+}
+
+/** Immeubles rattachés à un client (spec 003). */
+export function listSitesOfCustomer(token: string, customerId: string): Promise<SiteListResponse> {
+  return request(`/sites?customerId=${encodeURIComponent(customerId)}`, siteListResponseSchema, {
+    token,
+  });
+}
+
+/** Rattache l'immeuble à un client, ou l'en détache avec `null`. */
+export function setSiteCustomer(
+  token: string,
+  siteId: string,
+  customerId: string | null,
+): Promise<SiteResponse> {
+  return request(`/sites/${encodeURIComponent(siteId)}`, siteResponseSchema, {
+    method: "PATCH",
+    body: { customerId },
+    token,
+  });
+}
+
+export function listCustomers(token: string): Promise<CustomerListResponse> {
+  return request("/customers", customerListResponseSchema, { token });
+}
+
+export function getCustomer(token: string, customerId: string): Promise<CustomerResponse> {
+  return request(`/customers/${encodeURIComponent(customerId)}`, customerResponseSchema, { token });
+}
+
+export function createCustomer(
+  token: string,
+  customer: CreateCustomerRequest,
+): Promise<CustomerResponse> {
+  return request("/customers", customerResponseSchema, {
+    method: "POST",
+    body: customer,
+    token,
+  });
+}
+
+export function listContactsOfCustomer(
+  token: string,
+  customerId: string,
+): Promise<ContactListResponse> {
+  return request(
+    `/contacts?customerId=${encodeURIComponent(customerId)}`,
+    contactListResponseSchema,
+    { token },
+  );
+}
+
+export function createContact(
+  token: string,
+  contact: CreateContactRequest,
+): Promise<ContactResponse> {
+  return request("/contacts", contactResponseSchema, { method: "POST", body: contact, token });
 }
 
 export function getSite(token: string, siteId: string): Promise<SiteResponse> {

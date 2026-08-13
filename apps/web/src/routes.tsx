@@ -9,6 +9,8 @@ import {
 import { OfflineBanner } from "@/components/offline-banner";
 import { PwaUpdatePrompt } from "@/components/pwa-update-prompt";
 import { getSession, signOut, useSession } from "@/lib/auth";
+import { CustomerDetailPage } from "@/pages/customer-detail-page";
+import { CustomersPage } from "@/pages/customers-page";
 import { LoginPage } from "@/pages/login-page";
 import { SiteDetailPage } from "@/pages/site-detail-page";
 import { SitesPage } from "@/pages/sites-page";
@@ -57,6 +59,12 @@ function AuthenticatedLayout(): React.JSX.Element {
             <Link to="/" className="text-sm text-[var(--color-muted-foreground)] hover:underline">
               Parc
             </Link>
+            <Link
+              to="/clients"
+              className="text-sm text-[var(--color-muted-foreground)] hover:underline"
+            >
+              Clients
+            </Link>
           </nav>
           <div className="flex items-center gap-3">
             <span data-testid="session-email" className="text-sm">
@@ -94,6 +102,18 @@ const siteDetailRoute = createRoute({
   component: SiteDetailPage,
 });
 
+const customersRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/clients",
+  component: CustomersPage,
+});
+
+const customerDetailRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/clients/$customerId",
+  component: CustomerDetailPage,
+});
+
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/login",
@@ -109,7 +129,12 @@ const loginRoute = createRoute({
 });
 
 const routeTree = rootRoute.addChildren([
-  authenticatedRoute.addChildren([sitesRoute, siteDetailRoute]),
+  authenticatedRoute.addChildren([
+    sitesRoute,
+    siteDetailRoute,
+    customersRoute,
+    customerDetailRoute,
+  ]),
   loginRoute,
 ]);
 

@@ -29,11 +29,31 @@ export interface User {
   readonly role: UserRole;
 }
 
+/**
+ * Immeuble accueillant un ou plusieurs appareils.
+ *
+ * Le rattachement à un client (syndic, copropriété) arrive au lot L1.2 : tant
+ * que `customer` n'existe pas, le site n'en porte pas la référence.
+ */
+export interface Site {
+  readonly id: Id;
+  readonly tenantId: Id;
+  /** Nom d'usage de l'immeuble : « Résidence Les Tilleuls ». */
+  readonly name: string;
+  /** Numéro et voie. */
+  readonly addressLine: string;
+  readonly postalCode: string;
+  readonly city: string;
+}
+
 /** Appareil (ascenseur). */
 export interface Unit {
   readonly id: Id;
   readonly tenantId: Id;
+  /** Référence vérifiée vers un `Site` du même tenant (spec 002, R1). */
   readonly siteId: Id;
+  /** Repère de l'appareil dans son immeuble : « Ascenseur A ». Non unique. */
+  readonly reference: string;
   /** Mise en service. Point de départ du quinquennal à défaut de contrôle connu. */
   readonly commissionedOn: IsoDate | null;
   /** Dernier contrôle technique quinquennal réalisé. */

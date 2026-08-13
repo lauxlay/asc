@@ -20,6 +20,7 @@ function makeUnit(overrides: Partial<Unit> = {}): Unit {
     id: UNIT_ID,
     tenantId: TENANT,
     siteId: "site-1",
+    reference: "Ascenseur A",
     commissionedOn: null,
     lastStatutoryInspectionOn: null,
     ...overrides,

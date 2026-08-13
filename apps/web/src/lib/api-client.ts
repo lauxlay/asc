@@ -3,6 +3,8 @@ import {
   analyzeImportResponseSchema,
   type CommitImportResponse,
   type ComplianceDeadlineListResponse,
+  type ComplianceQuery,
+  type ComplianceResponse,
   type ContactListResponse,
   type ContactResponse,
   type ContractListResponse,
@@ -16,6 +18,7 @@ import {
   type CustomerResponse,
   commitImportResponseSchema,
   complianceDeadlineListResponseSchema,
+  complianceResponseSchema,
   contactListResponseSchema,
   contactResponseSchema,
   contractListResponseSchema,
@@ -262,6 +265,15 @@ export function listContractDeadlines(
     complianceDeadlineListResponseSchema,
     { token },
   );
+}
+
+/** Conformité du parc, calculée à chaque appel (spec 006, R7). */
+export function getCompliance(
+  token: string,
+  status: ComplianceQuery["status"],
+): Promise<ComplianceResponse> {
+  const search = status === undefined ? "" : `?status=${encodeURIComponent(status)}`;
+  return request(`/compliance${search}`, complianceResponseSchema, { token });
 }
 
 /** Analyse un CSV sans rien écrire. `mapping` à `null` = laisser deviner. */

@@ -9,6 +9,7 @@ import {
 import { OfflineBanner } from "@/components/offline-banner";
 import { PwaUpdatePrompt } from "@/components/pwa-update-prompt";
 import { getSession, signOut, useSession } from "@/lib/auth";
+import { CompliancePage } from "@/pages/compliance-page";
 import { ContractDetailPage } from "@/pages/contract-detail-page";
 import { ContractsPage } from "@/pages/contracts-page";
 import { CustomerDetailPage } from "@/pages/customer-detail-page";
@@ -73,6 +74,12 @@ function AuthenticatedLayout(): React.JSX.Element {
               className="text-sm text-[var(--color-muted-foreground)] hover:underline"
             >
               Contrats
+            </Link>
+            <Link
+              to="/conformite"
+              className="text-sm text-[var(--color-muted-foreground)] hover:underline"
+            >
+              Conformité
             </Link>
             <Link
               to="/import"
@@ -141,6 +148,12 @@ const contractDetailRoute = createRoute({
   component: ContractDetailPage,
 });
 
+const complianceRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/conformite",
+  component: CompliancePage,
+});
+
 const importRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: "/import",
@@ -169,6 +182,7 @@ const routeTree = rootRoute.addChildren([
     customerDetailRoute,
     contractsRoute,
     contractDetailRoute,
+    complianceRoute,
     importRoute,
   ]),
   loginRoute,

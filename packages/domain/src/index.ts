@@ -14,6 +14,7 @@ export {
   VISIT_ALERT_DAYS,
   VISIT_INTERVAL_WEEKS,
 } from "./compliance/deadlines.js";
+export { activeContractFor, worstDeadlineStatus } from "./compliance/parc-compliance.js";
 export {
   type CoveragePeriod,
   conflictingUnitIds,

@@ -10,7 +10,8 @@ import { OfflineBanner } from "@/components/offline-banner";
 import { PwaUpdatePrompt } from "@/components/pwa-update-prompt";
 import { getSession, signOut, useSession } from "@/lib/auth";
 import { LoginPage } from "@/pages/login-page";
-import { UnitsPage } from "@/pages/units-page";
+import { SiteDetailPage } from "@/pages/site-detail-page";
+import { SitesPage } from "@/pages/sites-page";
 
 /**
  * Routes du back-office, définies en code plutôt qu'en fichiers : pas d'étape
@@ -81,10 +82,16 @@ function AuthenticatedLayout(): React.JSX.Element {
   );
 }
 
-const unitsRoute = createRoute({
+const sitesRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: "/",
-  component: UnitsPage,
+  component: SitesPage,
+});
+
+const siteDetailRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/sites/$siteId",
+  component: SiteDetailPage,
 });
 
 const loginRoute = createRoute({
@@ -101,7 +108,10 @@ const loginRoute = createRoute({
   component: LoginPage,
 });
 
-const routeTree = rootRoute.addChildren([authenticatedRoute.addChildren([unitsRoute]), loginRoute]);
+const routeTree = rootRoute.addChildren([
+  authenticatedRoute.addChildren([sitesRoute, siteDetailRoute]),
+  loginRoute,
+]);
 
 export const router = createRouter({ routeTree, defaultPreload: "intent" });
 

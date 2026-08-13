@@ -6,9 +6,17 @@ import { Test } from "@nestjs/testing";
 import { createAppModule } from "../app.module.js";
 import { DEFAULT_TENANT_ID } from "../auth/auth.service.js";
 import { hashPassword } from "../auth/password.js";
-import { SITE_REPOSITORY, UNIT_REPOSITORY, USER_REPOSITORY } from "../common/tokens.js";
+import {
+  CONTACT_REPOSITORY,
+  CUSTOMER_REPOSITORY,
+  SITE_REPOSITORY,
+  UNIT_REPOSITORY,
+  USER_REPOSITORY,
+} from "../common/tokens.js";
 import type { ApiConfig } from "../config/env.js";
 import { configureApi } from "../configure-app.js";
+import { InMemoryContactRepository } from "../modules/contacts/in-memory-contact.repository.js";
+import { InMemoryCustomerRepository } from "../modules/customers/in-memory-customer.repository.js";
 import { InMemorySiteRepository } from "../modules/sites/in-memory-site.repository.js";
 import { InMemoryUnitRepository } from "../modules/units/in-memory-unit.repository.js";
 import { InMemoryUserRepository } from "../modules/users/in-memory-user.repository.js";
@@ -65,6 +73,10 @@ export async function createTestApp(): Promise<TestApp> {
   const moduleRef = await Test.createTestingModule({
     imports: [createAppModule(TEST_CONFIG)],
   })
+    .overrideProvider(CONTACT_REPOSITORY)
+    .useValue(new InMemoryContactRepository())
+    .overrideProvider(CUSTOMER_REPOSITORY)
+    .useValue(new InMemoryCustomerRepository())
     .overrideProvider(SITE_REPOSITORY)
     .useValue(new InMemorySiteRepository())
     .overrideProvider(UNIT_REPOSITORY)
@@ -120,13 +132,34 @@ export const TEST_SITE = {
 export async function createSite(
   testApp: TestApp,
   token: string,
-  overrides: Partial<Record<keyof typeof TEST_SITE, string>> = {},
+  overrides: Partial<Record<keyof typeof TEST_SITE, string>> & { customerId?: string } = {},
 ): Promise<string> {
   const response = await testApp.inject({
     method: "POST",
     url: "/api/sites",
     headers: bearer(token),
     payload: { ...TEST_SITE, ...overrides },
+  });
+  return response.json<{ id: string }>().id;
+}
+
+/** Client de test par défaut ; chaque champ reste surchargeable. */
+export const TEST_CUSTOMER = {
+  name: "Cabinet Dupont",
+  type: "managing_agent",
+} as const;
+
+/** Crée un client par le vrai parcours HTTP et rend son identifiant. */
+export async function createCustomer(
+  testApp: TestApp,
+  token: string,
+  overrides: Partial<Record<keyof typeof TEST_CUSTOMER, string>> = {},
+): Promise<string> {
+  const response = await testApp.inject({
+    method: "POST",
+    url: "/api/customers",
+    headers: bearer(token),
+    payload: { ...TEST_CUSTOMER, ...overrides },
   });
   return response.json<{ id: string }>().id;
 }

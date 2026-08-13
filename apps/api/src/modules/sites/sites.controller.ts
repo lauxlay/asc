@@ -39,7 +39,11 @@ export class SitesController {
     @CurrentUser() user: JwtPayload,
     @Query(new ZodValidationPipe(siteListQuerySchema)) query: SiteListQuery,
   ): Promise<SiteListResponse> {
-    return { items: [...(await this.sites.list(user.tenantId, query.q))] };
+    const items = await this.sites.list(user.tenantId, {
+      q: query.q,
+      customerId: query.customerId,
+    });
+    return { items: [...items] };
   }
 
   @Get(":id")

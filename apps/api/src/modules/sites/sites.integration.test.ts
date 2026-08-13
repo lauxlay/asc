@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   bearer,
+  createCustomer,
   createTestApp,
   login,
   TEST_SITE,
@@ -47,6 +48,7 @@ describe("CRUD /sites", () => {
       expect(response.json()).toStrictEqual({
         id: expect.stringMatching(UUID_PATTERN) as unknown,
         tenantId: "default",
+        customerId: null,
         ...TEST_SITE,
       });
     });
@@ -184,6 +186,7 @@ describe("CRUD /sites", () => {
       expect(response.json()).toStrictEqual({
         id: created.id,
         tenantId: "default",
+        customerId: null,
         ...TEST_SITE,
         city: "Villeurbanne",
       });
@@ -299,6 +302,120 @@ describe("CRUD /sites", () => {
       });
 
       expect(response.statusCode).toBe(404);
+    });
+  });
+
+  /** Spec 003, R1 — rattachement d'un immeuble à son client. */
+  describe("rattachement à un client", () => {
+    it("crée un site rattaché à un client existant", async () => {
+      const customerId = await createCustomer(api, token);
+
+      const response = await createSiteRaw({ ...TEST_SITE, customerId });
+
+      expect(response.statusCode).toBe(201);
+      expect(response.json<{ customerId: string }>().customerId).toBe(customerId);
+    });
+
+    it("refuse un customerId qui ne désigne aucun client", async () => {
+      const response = await createSiteRaw({ ...TEST_SITE, customerId: "client-inexistant" });
+
+      expect(response.statusCode).toBe(400);
+    });
+
+    it("refuse un client appartenant à un autre tenant, comme s'il était inconnu", async () => {
+      const intruder = await api.jwt.signAsync({
+        sub: "autre-utilisateur",
+        tenantId: "tenant-b",
+        email: "autre@ascenseur.test",
+        role: TEST_USER.role,
+      });
+      const foreignCustomer = await createCustomer(api, intruder, { name: "Client d'un autre" });
+
+      const response = await createSiteRaw({ ...TEST_SITE, customerId: foreignCustomer });
+
+      expect(response.statusCode).toBe(400);
+    });
+
+    it("rattache puis détache un immeuble par PATCH", async () => {
+      const customerId = await createCustomer(api, token);
+      const created = (await createSiteRaw()).json<{ id: string }>();
+
+      const attached = await api.inject({
+        method: "PATCH",
+        url: `/api/sites/${created.id}`,
+        headers: bearer(token),
+        payload: { customerId },
+      });
+      expect(attached.json<{ customerId: string }>().customerId).toBe(customerId);
+
+      const detached = await api.inject({
+        method: "PATCH",
+        url: `/api/sites/${created.id}`,
+        headers: bearer(token),
+        payload: { customerId: null },
+      });
+      expect(detached.json<{ customerId: unknown }>().customerId).toBeNull();
+    });
+
+    it("porte autant d'immeubles que voulu pour un même client", async () => {
+      const customerId = await createCustomer(api, token);
+      await createSiteRaw({ ...TEST_SITE, customerId, name: "Immeuble 1" });
+      await createSiteRaw({ ...TEST_SITE, customerId, name: "Immeuble 2" });
+
+      const response = await listSites(`?customerId=${customerId}`);
+
+      expect(response.json<{ items: unknown[] }>().items).toHaveLength(2);
+    });
+
+    it("ne fait pas fuir les immeubles d'un client par le filtre", async () => {
+      const customerId = await createCustomer(api, token);
+      await createSiteRaw({ ...TEST_SITE, customerId });
+      await createSiteRaw({ ...TEST_SITE, name: "Immeuble sans client" });
+
+      const response = await listSites(`?customerId=${customerId}`);
+
+      expect(response.json<{ items: { name: string }[] }>().items).toHaveLength(1);
+    });
+  });
+
+  /** Spec 003, R4 — un immeuble portant un gardien n'est pas supprimable. */
+  describe("suppression et contacts rattachés", () => {
+    const addGardien = (siteId: string, customerId: string) =>
+      api.inject({
+        method: "POST",
+        url: "/api/contacts",
+        headers: bearer(token),
+        payload: { customerId, siteId, name: "Martine Ferrand", role: "Gardienne" },
+      });
+
+    it("refuse de supprimer un site qui porte un contact", async () => {
+      const customerId = await createCustomer(api, token);
+      const created = (await createSiteRaw({ ...TEST_SITE, customerId })).json<{ id: string }>();
+      await addGardien(created.id, customerId);
+
+      const response = await api.inject({
+        method: "DELETE",
+        url: `/api/sites/${created.id}`,
+        headers: bearer(token),
+      });
+
+      expect(response.statusCode).toBe(409);
+    });
+
+    it("refuse de transférer un site dont les contacts suivraient l'ancien client", async () => {
+      const customerId = await createCustomer(api, token);
+      const autreClient = await createCustomer(api, token, { name: "Cabinet Durand" });
+      const created = (await createSiteRaw({ ...TEST_SITE, customerId })).json<{ id: string }>();
+      await addGardien(created.id, customerId);
+
+      const response = await api.inject({
+        method: "PATCH",
+        url: `/api/sites/${created.id}`,
+        headers: bearer(token),
+        payload: { customerId: autreClient },
+      });
+
+      expect(response.statusCode).toBe(409);
     });
   });
 

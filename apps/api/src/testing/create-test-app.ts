@@ -6,9 +6,10 @@ import { Test } from "@nestjs/testing";
 import { createAppModule } from "../app.module.js";
 import { DEFAULT_TENANT_ID } from "../auth/auth.service.js";
 import { hashPassword } from "../auth/password.js";
-import { UNIT_REPOSITORY, USER_REPOSITORY } from "../common/tokens.js";
+import { SITE_REPOSITORY, UNIT_REPOSITORY, USER_REPOSITORY } from "../common/tokens.js";
 import type { ApiConfig } from "../config/env.js";
 import { configureApi } from "../configure-app.js";
+import { InMemorySiteRepository } from "../modules/sites/in-memory-site.repository.js";
 import { InMemoryUnitRepository } from "../modules/units/in-memory-unit.repository.js";
 import { InMemoryUserRepository } from "../modules/users/in-memory-user.repository.js";
 
@@ -64,6 +65,8 @@ export async function createTestApp(): Promise<TestApp> {
   const moduleRef = await Test.createTestingModule({
     imports: [createAppModule(TEST_CONFIG)],
   })
+    .overrideProvider(SITE_REPOSITORY)
+    .useValue(new InMemorySiteRepository())
     .overrideProvider(UNIT_REPOSITORY)
     .useValue(new InMemoryUnitRepository())
     .overrideProvider(USER_REPOSITORY)
@@ -98,4 +101,32 @@ export async function login(testApp: TestApp): Promise<string> {
 
 export function bearer(token: string): Record<string, string> {
   return { authorization: `Bearer ${token}` };
+}
+
+/** Adresse de test par défaut ; chaque champ reste surchargeable. */
+export const TEST_SITE = {
+  name: "Résidence Les Tilleuls",
+  addressLine: "12 rue des Lilas",
+  postalCode: "69003",
+  city: "Lyon",
+} as const;
+
+/**
+ * Crée un site par le vrai parcours HTTP et rend son identifiant.
+ *
+ * Un appareil exige désormais un site existant (spec 002, R1) : la plupart des
+ * suites commencent donc par là.
+ */
+export async function createSite(
+  testApp: TestApp,
+  token: string,
+  overrides: Partial<Record<keyof typeof TEST_SITE, string>> = {},
+): Promise<string> {
+  const response = await testApp.inject({
+    method: "POST",
+    url: "/api/sites",
+    headers: bearer(token),
+    payload: { ...TEST_SITE, ...overrides },
+  });
+  return response.json<{ id: string }>().id;
 }

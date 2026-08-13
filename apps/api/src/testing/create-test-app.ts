@@ -8,6 +8,7 @@ import { DEFAULT_TENANT_ID } from "../auth/auth.service.js";
 import { hashPassword } from "../auth/password.js";
 import {
   CONTACT_REPOSITORY,
+  CONTRACT_REPOSITORY,
   CUSTOMER_REPOSITORY,
   SITE_REPOSITORY,
   UNIT_REPOSITORY,
@@ -16,6 +17,7 @@ import {
 import type { ApiConfig } from "../config/env.js";
 import { configureApi } from "../configure-app.js";
 import { InMemoryContactRepository } from "../modules/contacts/in-memory-contact.repository.js";
+import { InMemoryContractRepository } from "../modules/contracts/in-memory-contract.repository.js";
 import { InMemoryCustomerRepository } from "../modules/customers/in-memory-customer.repository.js";
 import { InMemorySiteRepository } from "../modules/sites/in-memory-site.repository.js";
 import { InMemoryUnitRepository } from "../modules/units/in-memory-unit.repository.js";
@@ -75,6 +77,8 @@ export async function createTestApp(): Promise<TestApp> {
   })
     .overrideProvider(CONTACT_REPOSITORY)
     .useValue(new InMemoryContactRepository())
+    .overrideProvider(CONTRACT_REPOSITORY)
+    .useValue(new InMemoryContractRepository())
     .overrideProvider(CUSTOMER_REPOSITORY)
     .useValue(new InMemoryCustomerRepository())
     .overrideProvider(SITE_REPOSITORY)
@@ -139,6 +143,26 @@ export async function createSite(
     url: "/api/sites",
     headers: bearer(token),
     payload: { ...TEST_SITE, ...overrides },
+  });
+  return response.json<{ id: string }>().id;
+}
+
+/**
+ * Crée un appareil par le vrai parcours HTTP et rend son identifiant.
+ *
+ * Un contrat ne peut couvrir que des appareils existants (spec 005, R3.1).
+ */
+export async function createUnit(
+  testApp: TestApp,
+  token: string,
+  siteId: string,
+  reference: string,
+): Promise<string> {
+  const response = await testApp.inject({
+    method: "POST",
+    url: "/api/units",
+    headers: bearer(token),
+    payload: { siteId, reference },
   });
   return response.json<{ id: string }>().id;
 }

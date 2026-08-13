@@ -7,6 +7,7 @@
  * que se décide « JSON aujourd'hui, SQLite demain » (ADR-001).
  */
 export const CONTACT_REPOSITORY = Symbol("CONTACT_REPOSITORY");
+export const CONTRACT_REPOSITORY = Symbol("CONTRACT_REPOSITORY");
 export const CUSTOMER_REPOSITORY = Symbol("CUSTOMER_REPOSITORY");
 export const SITE_REPOSITORY = Symbol("SITE_REPOSITORY");
 export const UNIT_REPOSITORY = Symbol("UNIT_REPOSITORY");

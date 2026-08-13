@@ -38,6 +38,25 @@ export {
 } from "./customer.contract.js";
 export { isoDateSchema } from "./iso-date.schema.js";
 export {
+  type ComplianceDeadlineListResponse,
+  type ComplianceDeadlineResponse,
+  type ContractListQuery,
+  type ContractListResponse,
+  type ContractResponse,
+  type CreateContractRequest,
+  complianceDeadlineListResponseSchema,
+  complianceDeadlineResponseSchema,
+  contractListQuerySchema,
+  contractListResponseSchema,
+  contractResponseSchema,
+  contractTypeSchema,
+  createContractRequestSchema,
+  deadlineKindSchema,
+  deadlineStatusSchema,
+  type UpdateContractRequest,
+  updateContractRequestSchema,
+} from "./maintenance-contract.contract.js";
+export {
   type AnalyzeImportRequest,
   type AnalyzeImportResponse,
   analyzeImportRequestSchema,

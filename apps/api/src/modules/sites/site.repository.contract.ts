@@ -25,6 +25,7 @@ function makeSite(overrides: Partial<Site> = {}): Site {
   return {
     id: "site-1",
     tenantId: TENANT_A,
+    customerId: null,
     name: "Résidence Les Tilleuls",
     addressLine: "12 rue des Lilas",
     postalCode: "69003",

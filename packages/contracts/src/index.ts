@@ -13,6 +13,29 @@ export {
   loginResponseSchema,
   userRoleSchema,
 } from "./auth.contract.js";
+export {
+  type ContactListQuery,
+  type ContactListResponse,
+  type ContactResponse,
+  type CreateContactRequest,
+  contactListQuerySchema,
+  contactListResponseSchema,
+  contactResponseSchema,
+  createContactRequestSchema,
+  type UpdateContactRequest,
+  updateContactRequestSchema,
+} from "./contact.contract.js";
+export {
+  type CreateCustomerRequest,
+  type CustomerListResponse,
+  type CustomerResponse,
+  createCustomerRequestSchema,
+  customerListResponseSchema,
+  customerResponseSchema,
+  customerTypeSchema,
+  type UpdateCustomerRequest,
+  updateCustomerRequestSchema,
+} from "./customer.contract.js";
 export { isoDateSchema } from "./iso-date.schema.js";
 export {
   type CreateSiteRequest,

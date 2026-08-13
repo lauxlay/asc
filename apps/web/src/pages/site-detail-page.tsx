@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createUnit, getSite, listUnits } from "@/lib/api-client";
+import { createUnit, getSite, listCustomers, listUnits } from "@/lib/api-client";
 import { useSession } from "@/lib/auth";
 
 /**
@@ -36,6 +36,19 @@ export function SiteDetailPage(): React.JSX.Element {
     queryFn: () => listUnits(token, siteId),
     enabled: token !== "",
   });
+
+  /** Sert à afficher le nom du client plutôt que son identifiant (spec 003). */
+  const customers = useQuery({
+    queryKey: ["customers"],
+    queryFn: () => listCustomers(token),
+    enabled: token !== "",
+  });
+
+  const customerId = site.data?.customerId ?? null;
+  const customer =
+    customerId === null
+      ? undefined
+      : customers.data?.items.find((candidate) => candidate.id === customerId);
 
   const addMutation = useMutation({
     mutationFn: (form: FormData) => {
@@ -89,6 +102,24 @@ export function SiteDetailPage(): React.JSX.Element {
         {site.data !== undefined && (
           <p data-testid="site-address" className="text-sm text-[var(--color-muted-foreground)]">
             {site.data.addressLine} — {site.data.postalCode} {site.data.city}
+          </p>
+        )}
+        {site.data !== undefined && (
+          <p data-testid="site-customer" className="text-sm text-[var(--color-muted-foreground)]">
+            {customer === undefined ? (
+              "Aucun client rattaché"
+            ) : (
+              <>
+                Client :{" "}
+                <Link
+                  to="/clients/$customerId"
+                  params={{ customerId: customer.id }}
+                  className="hover:underline"
+                >
+                  {customer.name}
+                </Link>
+              </>
+            )}
           </p>
         )}
       </div>

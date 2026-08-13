@@ -30,7 +30,11 @@ export {
   isoDate,
 } from "./date/iso-date.js";
 export {
+  type Contact,
   type Contract,
+  CUSTOMER_TYPES,
+  type Customer,
+  type CustomerType,
   type Id,
   type MaintenanceVisit,
   type Site,

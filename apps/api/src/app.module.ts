@@ -15,6 +15,8 @@ import {
 } from "./common/tokens.js";
 import { API_CONFIG, type ApiConfig } from "./config/env.js";
 import { HealthController } from "./health/health.controller.js";
+import { ComplianceController } from "./modules/compliance/compliance.controller.js";
+import { ComplianceService } from "./modules/compliance/compliance.service.js";
 import { ContactsController } from "./modules/contacts/contacts.controller.js";
 import { ContactsService } from "./modules/contacts/contacts.service.js";
 import { JsonContactRepository } from "./modules/contacts/json-contact.repository.js";
@@ -57,6 +59,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
     ],
     controllers: [
       AuthController,
+      ComplianceController,
       ContactsController,
       ContractsController,
       CustomersController,
@@ -102,6 +105,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
         inject: [JsonCollectionStore],
       },
       AuthService,
+      ComplianceService,
       ContactsService,
       ContractsService,
       CustomersService,

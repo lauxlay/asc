@@ -14,6 +14,19 @@ export {
   userRoleSchema,
 } from "./auth.contract.js";
 export {
+  type ComplianceQuery,
+  type ComplianceResponse,
+  type ComplianceRow,
+  type ComplianceRowStatus,
+  type ComplianceSummary,
+  complianceDeadlineCellSchema,
+  complianceQuerySchema,
+  complianceResponseSchema,
+  complianceRowSchema,
+  complianceRowStatusSchema,
+  complianceSummarySchema,
+} from "./compliance.contract.js";
+export {
   type ContactListQuery,
   type ContactListResponse,
   type ContactResponse,

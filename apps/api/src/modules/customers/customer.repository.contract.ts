@@ -60,11 +60,13 @@ export function describeCustomerRepositoryContract(
       it("conserve chaque type de client à l'identique", async () => {
         await repository.save(makeCustomer({ id: "c-1", type: "managing_agent" }));
         await repository.save(makeCustomer({ id: "c-2", type: "condominium" }));
-        await repository.save(makeCustomer({ id: "c-3", type: "individual" }));
+        await repository.save(makeCustomer({ id: "c-3", type: "business" }));
+        await repository.save(makeCustomer({ id: "c-4", type: "individual" }));
 
         expect((await repository.findById(TENANT_A, "c-1"))?.type).toBe("managing_agent");
         expect((await repository.findById(TENANT_A, "c-2"))?.type).toBe("condominium");
-        expect((await repository.findById(TENANT_A, "c-3"))?.type).toBe("individual");
+        expect((await repository.findById(TENANT_A, "c-3"))?.type).toBe("business");
+        expect((await repository.findById(TENANT_A, "c-4"))?.type).toBe("individual");
       });
     });
 

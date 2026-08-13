@@ -33,9 +33,13 @@ export interface User {
  * Types de client (`docs/03-application/03-modele-donnees.md`).
  *
  * `managing_agent` = syndic · `condominium` = copropriété ·
- * `individual` = particulier.
+ * `business` = professionnel (entreprise, hôtel, commerce propriétaire de son
+ * immeuble) · `individual` = particulier.
+ *
+ * `business` et non `company` : `company` désigne déjà le tenant — la société
+ * de maintenance elle-même — dans le glossaire figé.
  */
-export const CUSTOMER_TYPES = ["managing_agent", "condominium", "individual"] as const;
+export const CUSTOMER_TYPES = ["managing_agent", "condominium", "business", "individual"] as const;
 
 export type CustomerType = (typeof CUSTOMER_TYPES)[number];
 

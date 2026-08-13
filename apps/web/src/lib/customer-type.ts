@@ -10,6 +10,7 @@ import type { CustomerType } from "@asc/domain";
 export const CUSTOMER_TYPE_LABELS: Readonly<Record<CustomerType, string>> = {
   managing_agent: "Syndic",
   condominium: "Copropriété",
+  business: "Professionnel",
   individual: "Particulier",
 };
 

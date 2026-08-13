@@ -54,7 +54,7 @@ describe("CRUD /customers", () => {
       });
     });
 
-    it.each([["managing_agent"], ["condominium"], ["individual"]])(
+    it.each([["managing_agent"], ["condominium"], ["business"], ["individual"]])(
       "accepte le type %s",
       async (type) => {
         const response = await createCustomerRaw({ name: "Client", type });

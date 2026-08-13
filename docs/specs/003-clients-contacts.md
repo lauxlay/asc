@@ -27,7 +27,7 @@ customer ──< contact
 | `id` | UUID applicatif | Généré par le serveur (ADR-001) |
 | `tenantId` | Id | Vient du jeton, jamais du client |
 | `name` | string non vide | « Cabinet Dupont », « Copropriété Les Tilleuls » |
-| `type` | `managing_agent` \| `condominium` \| `individual` | Syndic / copropriété / particulier |
+| `type` | `managing_agent` \| `condominium` \| `business` \| `individual` | Syndic / copropriété / professionnel / particulier. Le professionnel est l'entreprise, l'hôtel ou le commerce propriétaire de son immeuble |
 
 ### `contact`
 
@@ -106,7 +106,8 @@ Identique aux lots précédents : lire, modifier ou supprimer une ressource d'un
 | Sujet | Choix | Pourquoi |
 |---|---|---|
 | `contact.siteId` optionnel | Ajouté | Le lot nomme explicitement le « gardien », qui est le contact d'**un immeuble**, pas d'un syndic gérant 40 immeubles. Le modèle figé ne rattache le contact qu'au client ; ce champ nullable couvre les deux cas sans le contredire. **Choix à valider** : si le contact doit vivre sous le site, c'est le modèle de données qu'il faut amender |
-| `customer.type` en anglais | `managing_agent` / `condominium` / `individual` | Convention « code en anglais ». `managing_agent` est la traduction métier de *syndic* ; le glossaire FR→EN ne tranchait que le nom de l'entité |
+| `customer.type` en anglais | `managing_agent` / `condominium` / `business` / `individual` | Convention « code en anglais ». `managing_agent` est la traduction métier de *syndic* ; le glossaire FR→EN ne tranchait que le nom de l'entité |
+| `business` et non `company` pour *professionnel* | `business` | `company` désigne déjà le tenant — la société de maintenance — dans le glossaire figé. Réutiliser le mot pour un client rendrait le modèle ambigu |
 | `role` du contact en texte libre | Chaîne | Une énumération figée serait fausse dès le premier client réel. À transformer en énumération le jour où une feature en dépend (notifications ciblées, L3.5) |
 | `site.customerId` nullable | Nullable | Les sites de L1.1 existent déjà sans client, et l'import CSV (L1.3) doit pouvoir charger un parc avant les clients |
 | Suppression d'un client à contacts → `409` | Refus | Cohérence avec la spec 002 R3 : dans un produit à valeur probante, rien ne disparaît par effet de bord |

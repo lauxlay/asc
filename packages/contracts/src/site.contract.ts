@@ -15,6 +15,7 @@ const addressField = z.string().trim().min(1);
 export const siteResponseSchema = z.object({
   id: z.string(),
   tenantId: z.string(),
+  customerId: z.string().nullable(),
   name: z.string(),
   addressLine: z.string(),
   postalCode: z.string(),
@@ -22,6 +23,8 @@ export const siteResponseSchema = z.object({
 }) satisfies z.ZodType<Site>;
 
 export const createSiteRequestSchema = z.object({
+  /** `null` = immeuble saisi avant que son client ne soit connu (spec 003, R1). */
+  customerId: z.string().trim().min(1).nullable().default(null),
   name: addressField,
   addressLine: addressField,
   postalCode: addressField,
@@ -43,6 +46,8 @@ export const siteListResponseSchema = z.object({
  */
 export const siteListQuerySchema = z.object({
   q: z.string().optional(),
+  /** Restreint la liste aux immeubles d'un client (spec 003). */
+  customerId: z.string().trim().min(1).optional(),
 });
 
 export type SiteResponse = z.infer<typeof siteResponseSchema>;

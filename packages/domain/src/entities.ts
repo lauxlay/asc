@@ -30,14 +30,52 @@ export interface User {
 }
 
 /**
+ * Types de client (`docs/03-application/03-modele-donnees.md`).
+ *
+ * `managing_agent` = syndic · `condominium` = copropriété ·
+ * `individual` = particulier.
+ */
+export const CUSTOMER_TYPES = ["managing_agent", "condominium", "individual"] as const;
+
+export type CustomerType = (typeof CUSTOMER_TYPES)[number];
+
+/** Client donneur d'ordre : syndic, copropriété ou particulier. */
+export interface Customer {
+  readonly id: Id;
+  readonly tenantId: Id;
+  readonly name: string;
+  readonly type: CustomerType;
+}
+
+/**
+ * Interlocuteur chez un client.
+ *
+ * `siteId` renseigné = contact d'un immeuble précis, le gardien typiquement ;
+ * `null` = interlocuteur du client en général (spec 003, R2).
+ */
+export interface Contact {
+  readonly id: Id;
+  readonly tenantId: Id;
+  readonly customerId: Id;
+  readonly siteId: Id | null;
+  readonly name: string;
+  /** Texte libre : « Gardien », « Gestionnaire »… (spec 003, R2.3). */
+  readonly role: string;
+  readonly email: string | null;
+  readonly phone: string | null;
+}
+
+/**
  * Immeuble accueillant un ou plusieurs appareils.
  *
- * Le rattachement à un client (syndic, copropriété) arrive au lot L1.2 : tant
- * que `customer` n'existe pas, le site n'en porte pas la référence.
+ * `customerId` est nullable : un immeuble peut être saisi avant que son syndic
+ * ne soit connu, et le parc importé avant les clients (spec 003, R1).
  */
 export interface Site {
   readonly id: Id;
   readonly tenantId: Id;
+  /** Client donneur d'ordre, `null` tant qu'il n'est pas rattaché. */
+  readonly customerId: Id | null;
   /** Nom d'usage de l'immeuble : « Résidence Les Tilleuls ». */
   readonly name: string;
   /** Numéro et voie. */

@@ -7,6 +7,7 @@ import { JwtAuthGuard } from "./auth/jwt-auth.guard.js";
 import { DomainExceptionFilter } from "./common/domain-exception.filter.js";
 import { UNIT_REPOSITORY, USER_REPOSITORY } from "./common/tokens.js";
 import { API_CONFIG, type ApiConfig } from "./config/env.js";
+import { HealthController } from "./health/health.controller.js";
 import { JsonUnitRepository } from "./modules/units/json-unit.repository.js";
 import { UnitsController } from "./modules/units/units.controller.js";
 import { UnitsService } from "./modules/units/units.service.js";
@@ -33,7 +34,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
         signOptions: { expiresIn: config.JWT_EXPIRES_IN },
       }),
     ],
-    controllers: [AuthController, UnitsController],
+    controllers: [AuthController, HealthController, UnitsController],
     providers: [
       { provide: API_CONFIG, useValue: config },
       {

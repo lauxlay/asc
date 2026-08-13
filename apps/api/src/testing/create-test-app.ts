@@ -8,6 +8,7 @@ import { DEFAULT_TENANT_ID } from "../auth/auth.service.js";
 import { hashPassword } from "../auth/password.js";
 import { UNIT_REPOSITORY, USER_REPOSITORY } from "../common/tokens.js";
 import type { ApiConfig } from "../config/env.js";
+import { configureApi } from "../configure-app.js";
 import { InMemoryUnitRepository } from "../modules/units/in-memory-unit.repository.js";
 import { InMemoryUserRepository } from "../modules/users/in-memory-user.repository.js";
 
@@ -23,6 +24,7 @@ import { InMemoryUserRepository } from "../modules/users/in-memory-user.reposito
 export const TEST_CONFIG: ApiConfig = {
   PORT: 0,
   DATA_DIR: "/inexistant-en-test",
+  WEB_DIST_DIR: null,
   JWT_SECRET: "secret-de-test-suffisamment-long-pour-zod",
   JWT_EXPIRES_IN: 3600,
 };
@@ -69,6 +71,9 @@ export async function createTestApp(): Promise<TestApp> {
     .compile();
 
   const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+  // Même configuration qu'en production : sans cela les tests exerceraient un
+  // routage différent de celui qui tourne réellement.
+  configureApi(app);
   await app.init();
   await app.getHttpAdapter().getInstance().ready();
 
@@ -84,7 +89,7 @@ export async function createTestApp(): Promise<TestApp> {
 export async function login(testApp: TestApp): Promise<string> {
   const response = await testApp.inject({
     method: "POST",
-    url: "/auth/login",
+    url: "/api/auth/login",
     payload: { email: TEST_USER.email, password: TEST_USER.password },
   });
   const body = response.json<{ accessToken: string }>();

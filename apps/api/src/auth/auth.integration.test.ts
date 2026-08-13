@@ -13,7 +13,7 @@ describe("POST /auth/login", () => {
   });
 
   const login = (payload: unknown) =>
-    api.inject({ method: "POST", url: "/auth/login", payload: payload as object });
+    api.inject({ method: "POST", url: "/api/auth/login", payload: payload as object });
 
   it("rend un jeton utilisable pour les identifiants corrects", async () => {
     const response = await login({ email: TEST_USER.email, password: TEST_USER.password });
@@ -30,7 +30,7 @@ describe("POST /auth/login", () => {
 
     const guarded = await api.inject({
       method: "GET",
-      url: "/units",
+      url: "/api/units",
       headers: bearer(body.accessToken),
     });
     expect(guarded.statusCode).toBe(200);
@@ -97,7 +97,7 @@ describe("garde d'authentification", () => {
     [{ authorization: "Basic abc" }, "mauvais schéma"],
     [{ authorization: "Bearer " }, "jeton vide"],
   ])("refuse l'accès à /units (%s)", async (headers, _description) => {
-    const response = await api.inject({ method: "GET", url: "/units", headers });
+    const response = await api.inject({ method: "GET", url: "/api/units", headers });
 
     expect(response.statusCode).toBe(401);
   });
@@ -112,7 +112,7 @@ describe("garde d'authentification", () => {
 
     const response = await api.inject({
       method: "GET",
-      url: "/units",
+      url: "/api/units",
       headers: bearer(forged),
     });
 

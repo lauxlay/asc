@@ -25,6 +25,7 @@ pnpm check
 | `pnpm check` | lint + typecheck + test + build — **identique à la CI** |
 | `pnpm fix` | corrige lint et formatage (Biome) |
 | `pnpm typecheck` / `pnpm test` / `pnpm build` | une étape à la fois |
+| `pnpm e2e` | suite Playwright complète (navigateurs requis) |
 | `pnpm dev` | serveurs de dev (au fur et à mesure des lots) |
 
 ## Structure
@@ -44,6 +45,16 @@ docs/         # nomenclature projet (business, produit, application, ADR, specs)
 ```
 
 Règle de dépendances : `apps/* → contracts → domain`, `apps/* → ui`. Jamais d'import entre apps, jamais de logique métier hors de `domain`.
+
+## Docker
+
+```bash
+cp .env.example .env          # renseigner JWT_SECRET : openssl rand -base64 48
+docker compose up --build
+docker compose exec app node apps/api/dist/seed.js   # jeu de démonstration
+```
+
+Une image unique sert l'API sur `/api` et le back-office sur `/`, avec `data/` en volume persistant. Détails et procédure de déploiement : [`docs/03-application/10-deploiement.md`](docs/03-application/10-deploiement.md).
 
 ## Contribuer
 

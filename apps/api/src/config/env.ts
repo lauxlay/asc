@@ -9,6 +9,16 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   /** Racine du volume persistant monté en production (ADR-002). */
   DATA_DIR: z.string().min(1).default("./data"),
+  /**
+   * Back-office buildé à servir depuis le même container (ADR-002). Absent en
+   * développement, où Vite s'en charge.
+   */
+  WEB_DIST_DIR: z
+    .string()
+    .min(1)
+    .nullable()
+    .default(null)
+    .transform((value) => (value === "" ? null : value)),
   /** Secret de signature des jetons — aucune valeur par défaut, jamais. */
   JWT_SECRET: z.string().min(32, "JWT_SECRET doit faire au moins 32 caractères"),
   /** Durée de validité d'un jeton, en secondes. */

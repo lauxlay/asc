@@ -62,3 +62,43 @@ jobs:
           name: rapport-playwright
           path: apps/web/playwright-report/
           retention-days: 7
+
+  docker:
+    name: image docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v3
+
+      # L'artefact déployé est buildé à chaque PR : une image qui ne se
+      # construit pas ne doit pas être découverte au moment du déploiement.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runtime
+          tags: asc:ci
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Démarrage et sonde de santé
+        run: |
+          docker run -d --name asc-ci -p 3000:3000 \
+            -e JWT_SECRET="secret-de-ci-suffisamment-long-pour-passer-zod" asc:ci
+          for attempt in $(seq 1 30); do
+            state=$(docker inspect -f '{{.State.Health.Status}}' asc-ci)
+            [ "$state" = "healthy" ] && break
+            [ "$state" = "unhealthy" ] && { docker logs asc-ci; exit 1; }
+            sleep 2
+          done
+          [ "$(docker inspect -f '{{.State.Health.Status}}' asc-ci)" = "healthy" ] \
+            || { docker logs asc-ci; exit 1; }
+
+      - name: L'image sert l'API et le back-office
+        run: |
+          set -e
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api/health)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/login)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api/units)" = 401

@@ -14,11 +14,9 @@ import { VitePWA } from "vite-plugin-pwa";
 const apiTarget = process.env.API_URL ?? "http://127.0.0.1:3000";
 
 const apiProxy = {
-  "/api": {
-    target: apiTarget,
-    changeOrigin: true,
-    rewrite: (path: string) => path.replace(/^\/api/, ""),
-  },
+  // Pas de réécriture : l'API expose elle-même son préfixe `/api`
+  // (`apps/api/src/configure-app.ts`), en développement comme en production.
+  "/api": { target: apiTarget, changeOrigin: true },
 };
 
 export default defineConfig({

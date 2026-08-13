@@ -1,0 +1,42 @@
+# Environnement local identique à celui de production (ADR-002) : la même image
+# sert l'API et le back-office, avec le même volume persistant.
+#
+#   cp .env.example .env   # puis renseigner JWT_SECRET
+#   docker compose up --build
+#   docker compose run --rm app node apps/api/dist/seed.js   # jeu de démo
+#
+# Le développement au quotidien reste hors Docker (`pnpm dev`, rechargement à
+# chaud). Ce compose sert à vérifier l'artefact réel avant de le déployer.
+
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    image: asc:local
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      # Port interne fixe : c'est le mapping ci-dessus qui change côté hôte.
+      PORT: 3000
+      DATA_DIR: /data
+      WEB_DIST_DIR: /app/apps/web/dist
+      JWT_SECRET: ${JWT_SECRET:?renseigner JWT_SECRET dans .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-28800}
+    volumes:
+      # JSON et fichiers : le seul état de l'application (ADR-001).
+      - asc-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+volumes:
+  asc-data:

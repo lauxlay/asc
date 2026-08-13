@@ -25,7 +25,7 @@ describe("CRUD /units", () => {
   const createUnit = (payload: unknown = { siteId: "site-1" }) =>
     api.inject({
       method: "POST",
-      url: "/units",
+      url: "/api/units",
       headers: bearer(token),
       payload: payload as object,
     });
@@ -87,14 +87,22 @@ describe("CRUD /units", () => {
       await createUnit({ siteId: "site-1" });
       await createUnit({ siteId: "site-2" });
 
-      const response = await api.inject({ method: "GET", url: "/units", headers: bearer(token) });
+      const response = await api.inject({
+        method: "GET",
+        url: "/api/units",
+        headers: bearer(token),
+      });
 
       expect(response.statusCode).toBe(200);
       expect(response.json<{ items: unknown[] }>().items).toHaveLength(2);
     });
 
     it("rend une liste vide quand le parc est vide", async () => {
-      const response = await api.inject({ method: "GET", url: "/units", headers: bearer(token) });
+      const response = await api.inject({
+        method: "GET",
+        url: "/api/units",
+        headers: bearer(token),
+      });
 
       expect(response.json<{ items: unknown[] }>().items).toStrictEqual([]);
     });
@@ -104,7 +112,7 @@ describe("CRUD /units", () => {
 
       const response = await api.inject({
         method: "GET",
-        url: `/units/${created.id}`,
+        url: `/api/units/${created.id}`,
         headers: bearer(token),
       });
 
@@ -115,7 +123,7 @@ describe("CRUD /units", () => {
     it("répond 404 pour un appareil inconnu", async () => {
       const response = await api.inject({
         method: "GET",
-        url: "/units/inconnu",
+        url: "/api/units/inconnu",
         headers: bearer(token),
       });
 
@@ -131,7 +139,7 @@ describe("CRUD /units", () => {
 
       const response = await api.inject({
         method: "PATCH",
-        url: `/units/${created.id}`,
+        url: `/api/units/${created.id}`,
         headers: bearer(token),
         payload: { siteId: "site-2" },
       });
@@ -153,7 +161,7 @@ describe("CRUD /units", () => {
 
       const response = await api.inject({
         method: "PATCH",
-        url: `/units/${created.id}`,
+        url: `/api/units/${created.id}`,
         headers: bearer(token),
         payload: { commissionedOn: null },
       });
@@ -164,7 +172,7 @@ describe("CRUD /units", () => {
     it("répond 404 pour un appareil inconnu", async () => {
       const response = await api.inject({
         method: "PATCH",
-        url: "/units/inconnu",
+        url: "/api/units/inconnu",
         headers: bearer(token),
         payload: { siteId: "site-2" },
       });
@@ -177,7 +185,7 @@ describe("CRUD /units", () => {
 
       const response = await api.inject({
         method: "PATCH",
-        url: `/units/${created.id}`,
+        url: `/api/units/${created.id}`,
         headers: bearer(token),
         payload: { commissionedOn: "hier" },
       });
@@ -192,14 +200,14 @@ describe("CRUD /units", () => {
 
       const deleted = await api.inject({
         method: "DELETE",
-        url: `/units/${created.id}`,
+        url: `/api/units/${created.id}`,
         headers: bearer(token),
       });
       expect(deleted.statusCode).toBe(204);
 
       const reread = await api.inject({
         method: "GET",
-        url: `/units/${created.id}`,
+        url: `/api/units/${created.id}`,
         headers: bearer(token),
       });
       expect(reread.statusCode).toBe(404);
@@ -208,7 +216,7 @@ describe("CRUD /units", () => {
     it("répond 404 pour un appareil inconnu", async () => {
       const response = await api.inject({
         method: "DELETE",
-        url: "/units/inconnu",
+        url: "/api/units/inconnu",
         headers: bearer(token),
       });
 
@@ -232,7 +240,7 @@ describe("CRUD /units", () => {
 
       const response = await api.inject({
         method: "GET",
-        url: `/units/${created.id}`,
+        url: `/api/units/${created.id}`,
         headers: bearer(intruder),
       });
 
@@ -245,14 +253,14 @@ describe("CRUD /units", () => {
 
       const deletion = await api.inject({
         method: "DELETE",
-        url: `/units/${created.id}`,
+        url: `/api/units/${created.id}`,
         headers: bearer(intruder),
       });
       expect(deletion.statusCode).toBe(404);
 
       const stillThere = await api.inject({
         method: "GET",
-        url: `/units/${created.id}`,
+        url: `/api/units/${created.id}`,
         headers: bearer(token),
       });
       expect(stillThere.statusCode).toBe(200);
@@ -264,7 +272,7 @@ describe("CRUD /units", () => {
 
       const response = await api.inject({
         method: "GET",
-        url: "/units",
+        url: "/api/units",
         headers: bearer(intruder),
       });
 

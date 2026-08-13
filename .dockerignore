@@ -1,0 +1,25 @@
+**/node_modules
+**/dist
+**/build
+**/.turbo
+**/coverage
+**/*.tsbuildinfo
+
+# Données et artefacts de test : jamais dans une image
+data
+**/.e2e-data
+**/.demo-data
+**/playwright-report
+**/test-results
+
+.git
+.github
+.claude
+docs
+**/*.md
+!apps/api/package.json
+
+**/.env
+**/.env.*
+!**/.env.example
+.DS_Store

@@ -115,15 +115,17 @@ async function planWithKeyboard(page: Page, target: Locator, technician: string)
   await expect(live).toContainText("Sur la liste à planifier");
   await target.press("ArrowRight");
 
+  // Autant de pas que de lignes, plus une marge : la suite parallèle en crée
+  // pendant que ce test tourne.
+  const steps = (await page.getByRole("rowheader").count()) + 5;
+
   for (const key of ["ArrowDown", "ArrowUp"]) {
-    for (let step = 0; step < 40; step += 1) {
-      const before = await announcement();
-      if (before.includes(technician)) {
+    for (let step = 0; step < steps; step += 1) {
+      if ((await announcement()).includes(technician)) {
         break;
       }
-      await target.press(key);
-      if ((await announcement()) === before) {
-        // Bord de la grille : plus rien dans ce sens.
+      if (!(await pressAndMove(target, live, key))) {
+        // Bord de la grille : plus rien dans ce sens, on essaie l'autre.
         break;
       }
     }
@@ -135,6 +137,24 @@ async function planWithKeyboard(page: Page, target: Locator, technician: string)
   await expect(live).toContainText(technician);
   await target.press(" ");
   await expect(live).toContainText(`Déposé sur ${technician}`);
+}
+
+/**
+ * Presse une touche et dit si la carte a **effectivement** changé de zone.
+ *
+ * L'attente bornée est ce qui distingue « on est au bord » d'une annonce lue
+ * une fraction de seconde trop tôt. Sans elle, une lecture prématurée fait
+ * croire au bord et le parcours s'arrête sur la mauvaise ligne.
+ */
+async function pressAndMove(target: Locator, live: Locator, key: string): Promise<boolean> {
+  const before = (await live.textContent()) ?? "";
+  await target.press(key);
+  try {
+    await expect(live).not.toHaveText(before, { timeout: 1_000 });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Renvoie la carte au backlog : des flèches à gauche jusqu'à en sortir. */

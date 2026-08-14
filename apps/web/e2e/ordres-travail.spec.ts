@@ -115,7 +115,14 @@ test("un second signalement se rattache à l'OT ouvert au lieu d'en créer un au
   await selectUnit(page, street, "Ascenseur A");
   await page.getByLabel("Description").fill("Ascenseur à l'arrêt");
   await page.getByRole("button", { name: "Créer l'OT" }).click();
-  const reference = await page.getByTestId("work-order-reference").innerText();
+
+  // Attendre que la référence soit réellement chargée avant de la lire : le
+  // titre existe dès le rendu, avec « Chargement… » tant que la requête est en
+  // vol. Sans cette garde, on capture le libellé d'attente sur une machine
+  // lente.
+  const referenceHeading = page.getByTestId("work-order-reference");
+  await expect(referenceHeading).toHaveText(/^OT-\d{4}-\d{5}$/);
+  const reference = await referenceHeading.innerText();
 
   // Second appel, vingt minutes plus tard : un résident signale la même chose.
   await selectUnit(page, street, "Ascenseur A");

@@ -13,6 +13,7 @@ import {
   SITE_REPOSITORY,
   UNIT_REPOSITORY,
   USER_REPOSITORY,
+  WORK_ORDER_REPOSITORY,
 } from "../common/tokens.js";
 import type { ApiConfig } from "../config/env.js";
 import { configureApi } from "../configure-app.js";
@@ -22,6 +23,7 @@ import { InMemoryCustomerRepository } from "../modules/customers/in-memory-custo
 import { InMemorySiteRepository } from "../modules/sites/in-memory-site.repository.js";
 import { InMemoryUnitRepository } from "../modules/units/in-memory-unit.repository.js";
 import { InMemoryUserRepository } from "../modules/users/in-memory-user.repository.js";
+import { InMemoryWorkOrderRepository } from "../modules/work-orders/in-memory-work-order.repository.js";
 
 /**
  * Application de test : le vrai câblage NestJS, avec les adaptateurs mémoire à
@@ -87,6 +89,8 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(new InMemoryUnitRepository())
     .overrideProvider(USER_REPOSITORY)
     .useValue(users)
+    .overrideProvider(WORK_ORDER_REPOSITORY)
+    .useValue(new InMemoryWorkOrderRepository())
     .compile();
 
   const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());

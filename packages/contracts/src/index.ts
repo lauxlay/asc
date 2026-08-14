@@ -110,3 +110,22 @@ export {
   unitResponseSchema,
   updateUnitRequestSchema,
 } from "./unit.contract.js";
+export {
+  type CreateWorkOrderRequest,
+  createWorkOrderRequestSchema,
+  entrapmentDetailsRequestSchema,
+  entrapmentDetailsResponseSchema,
+  type UpdateWorkOrderRequest,
+  updateWorkOrderRequestSchema,
+  type WorkOrderChainResponse,
+  type WorkOrderListQuery,
+  type WorkOrderListResponse,
+  type WorkOrderResponse,
+  workOrderChainResponseSchema,
+  workOrderListQuerySchema,
+  workOrderListResponseSchema,
+  workOrderPrioritySchema,
+  workOrderResponseSchema,
+  workOrderStatusSchema,
+  workOrderTypeSchema,
+} from "./work-order.contract.js";

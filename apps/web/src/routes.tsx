@@ -18,6 +18,9 @@ import { ImportPage } from "@/pages/import-page";
 import { LoginPage } from "@/pages/login-page";
 import { SiteDetailPage } from "@/pages/site-detail-page";
 import { SitesPage } from "@/pages/sites-page";
+import { WorkOrderDetailPage } from "@/pages/work-order-detail-page";
+import { WorkOrderNewPage } from "@/pages/work-order-new-page";
+import { WorkOrdersPage } from "@/pages/work-orders-page";
 
 /**
  * Routes du back-office, définies en code plutôt qu'en fichiers : pas d'étape
@@ -74,6 +77,9 @@ function AuthenticatedLayout(): React.JSX.Element {
               className="text-sm text-[var(--color-muted-foreground)] hover:underline"
             >
               Contrats
+            </Link>
+            <Link to="/ot" className="text-sm text-[var(--color-muted-foreground)] hover:underline">
+              OT
             </Link>
             <Link
               to="/conformite"
@@ -148,6 +154,25 @@ const contractDetailRoute = createRoute({
   component: ContractDetailPage,
 });
 
+const workOrdersRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/ot",
+  component: WorkOrdersPage,
+});
+
+/** Déclarée avant la route dynamique : « nouveau » n'est pas un identifiant. */
+const workOrderNewRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/ot/nouveau",
+  component: WorkOrderNewPage,
+});
+
+const workOrderDetailRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/ot/$workOrderId",
+  component: WorkOrderDetailPage,
+});
+
 const complianceRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: "/conformite",
@@ -182,6 +207,9 @@ const routeTree = rootRoute.addChildren([
     customerDetailRoute,
     contractsRoute,
     contractDetailRoute,
+    workOrdersRoute,
+    workOrderNewRoute,
+    workOrderDetailRoute,
     complianceRoute,
     importRoute,
   ]),

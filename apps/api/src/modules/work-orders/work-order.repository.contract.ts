@@ -33,6 +33,9 @@ function makeDraft(overrides: Partial<WorkOrderDraft> = {}): WorkOrderDraft {
     reportedAt: "2026-03-10T09:00:00.000Z",
     lastReportedAt: "2026-03-10T09:00:00.000Z",
     entrapment: null,
+    // Un OT naît au backlog (spec 008, R6.3).
+    assignee: null,
+    scheduledOn: null,
     ...overrides,
   };
 }

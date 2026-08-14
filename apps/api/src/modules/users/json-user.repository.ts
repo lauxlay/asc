@@ -24,6 +24,10 @@ export class JsonUserRepository implements UserRepository {
     return users.find((user) => user.id === id) ?? null;
   }
 
+  async findAll(tenantId: Id): Promise<readonly PersistedUser[]> {
+    return this.#all(tenantId);
+  }
+
   async save(user: PersistedUser): Promise<void> {
     await this.#store.update(
       { tenantId: user.tenantId, collection: COLLECTION },

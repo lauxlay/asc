@@ -32,9 +32,11 @@ export class AuthService {
   async login({ email, password }: LoginRequest): Promise<LoginResponse> {
     const user = await this.users.findByEmail(DEFAULT_TENANT_ID, email);
 
-    // Sur email inconnu comme sur mot de passe faux : même erreur, même
-    // message. Rien ne doit permettre d'énumérer les comptes existants.
-    const valid = user !== null && (await verifyPassword(password, user.passwordHash));
+    // Sur email inconnu, mot de passe faux **ou compte désactivé** (spec 008,
+    // R1.9) : même erreur, même message. Rien ne doit permettre d'énumérer les
+    // comptes existants ni de distinguer « désactivé » de « inexistant ».
+    const valid =
+      user !== null && user.active && (await verifyPassword(password, user.passwordHash));
     if (!valid || user === null) {
       throw new UnauthorizedException("Identifiants invalides");
     }

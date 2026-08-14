@@ -29,6 +29,8 @@ import { CustomersService } from "./modules/customers/customers.service.js";
 import { JsonCustomerRepository } from "./modules/customers/json-customer.repository.js";
 import { ParcImportController } from "./modules/parc-import/parc-import.controller.js";
 import { ParcImportService } from "./modules/parc-import/parc-import.service.js";
+import { PlanningController } from "./modules/planning/planning.controller.js";
+import { PlanningService } from "./modules/planning/planning.service.js";
 import { JsonSiteRepository } from "./modules/sites/json-site.repository.js";
 import { SitesController } from "./modules/sites/sites.controller.js";
 import { SitesService } from "./modules/sites/sites.service.js";
@@ -36,6 +38,8 @@ import { JsonUnitRepository } from "./modules/units/json-unit.repository.js";
 import { UnitsController } from "./modules/units/units.controller.js";
 import { UnitsService } from "./modules/units/units.service.js";
 import { JsonUserRepository } from "./modules/users/json-user.repository.js";
+import { UsersController } from "./modules/users/users.controller.js";
+import { UsersService } from "./modules/users/users.service.js";
 import { JsonWorkOrderRepository } from "./modules/work-orders/json-work-order.repository.js";
 import { WorkOrdersController } from "./modules/work-orders/work-orders.controller.js";
 import { WorkOrdersService } from "./modules/work-orders/work-orders.service.js";
@@ -69,8 +73,10 @@ export function createAppModule(config: ApiConfig): DynamicModule {
       CustomersController,
       HealthController,
       ParcImportController,
+      PlanningController,
       SitesController,
       UnitsController,
+      UsersController,
       WorkOrdersController,
     ],
     providers: [
@@ -120,8 +126,10 @@ export function createAppModule(config: ApiConfig): DynamicModule {
       ContractsService,
       CustomersService,
       ParcImportService,
+      PlanningService,
       SitesService,
       UnitsService,
+      UsersService,
       WorkOrdersService,
       { provide: APP_GUARD, useClass: JwtAuthGuard },
       { provide: APP_FILTER, useClass: DomainExceptionFilter },

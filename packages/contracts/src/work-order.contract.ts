@@ -5,6 +5,7 @@ import {
   type WorkOrder,
 } from "@asc/domain";
 import { z } from "zod";
+import { isoDateSchema } from "./iso-date.schema.js";
 
 /**
  * Contrats de l'API `work-orders` (spec 007).
@@ -64,6 +65,8 @@ export const workOrderResponseSchema = z.object({
   reportedAt: timestampSchema,
   lastReportedAt: timestampSchema,
   entrapment: entrapmentDetailsResponseSchema.nullable(),
+  assignee: z.string().nullable(),
+  scheduledOn: isoDateSchema.nullable(),
 }) satisfies z.ZodType<WorkOrder>;
 
 /**
@@ -85,15 +88,41 @@ export const createWorkOrderRequestSchema = z.object({
 });
 
 /**
+ * Statuts qu'un client peut demander.
+ *
+ * `assigned` en est exclu (spec 008, R4.2) : on y entre en affectant l'OT au
+ * planning, jamais en demandant un statut. L'accepter ici permettrait un OT
+ * « affecté » sans technicien ni jour.
+ */
+export const requestableWorkOrderStatusSchema = z.enum([
+  "new",
+  "in_progress",
+  "done",
+  "cancelled",
+]) satisfies z.ZodType<Exclude<WorkOrder["status"], "assigned">>;
+
+/**
+ * `PATCH /work-orders/:id/assignment` — le geste du glisser-déposer.
+ *
+ * Les deux champs sont **obligatoirement fournis ensemble** : soit les deux
+ * renseignés (l'OT est planifié), soit les deux à `null` (il retourne au
+ * backlog). Une combinaison mixte est refusée par le domaine (spec 008, R2).
+ */
+export const assignWorkOrderRequestSchema = z.object({
+  assignee: z.string().trim().min(1).nullable(),
+  scheduledOn: isoDateSchema.nullable(),
+});
+
+/**
  * `PATCH` : seuls les champs fournis sont modifiés.
  *
  * `status` passe par ici et déclenche la validation de transition (R4.3). La
- * référence, le compteur de signalements et les horodatages ne sont jamais
- * modifiables par le client.
+ * référence, le compteur de signalements, les horodatages et l'affectation ne
+ * sont jamais modifiables par ici.
  */
 export const updateWorkOrderRequestSchema = z
   .object({
-    status: workOrderStatusSchema,
+    status: requestableWorkOrderStatusSchema,
     summary: z.string().trim().min(1),
     priority: workOrderPrioritySchema,
     onSiteContact: optionalText,
@@ -116,6 +145,7 @@ export const workOrderListQuerySchema = z.object({
   status: workOrderStatusSchema.optional(),
   type: workOrderTypeSchema.optional(),
   unitId: z.string().trim().min(1).optional(),
+  assignee: z.string().trim().min(1).optional(),
   // Énumération plutôt que booléen coercé : `z.coerce.boolean()` rendrait
   // `true` pour la chaîne « false », ce qui inverserait silencieusement le
   // filtre.
@@ -131,6 +161,7 @@ export const workOrderChainResponseSchema = z.object({
 });
 
 export type WorkOrderResponse = z.infer<typeof workOrderResponseSchema>;
+export type AssignWorkOrderRequest = z.infer<typeof assignWorkOrderRequestSchema>;
 export type CreateWorkOrderRequest = z.infer<typeof createWorkOrderRequestSchema>;
 export type UpdateWorkOrderRequest = z.infer<typeof updateWorkOrderRequestSchema>;
 export type WorkOrderListResponse = z.infer<typeof workOrderListResponseSchema>;

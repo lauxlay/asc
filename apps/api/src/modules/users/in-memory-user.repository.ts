@@ -22,6 +22,12 @@ export class InMemoryUserRepository implements UserRepository {
     return this.#users.get(InMemoryUserRepository.#keyOf(tenantId, id)) ?? null;
   }
 
+  async findAll(tenantId: Id): Promise<readonly PersistedUser[]> {
+    // L'ordre d'insertion d'une `Map` est stable : même ordre que l'adaptateur
+    // JSON, qui rend les enregistrements dans l'ordre du fichier.
+    return [...this.#users.values()].filter((user) => user.tenantId === tenantId);
+  }
+
   async save(user: PersistedUser): Promise<void> {
     this.#users.set(InMemoryUserRepository.#keyOf(user.tenantId, user.id), { ...user });
   }

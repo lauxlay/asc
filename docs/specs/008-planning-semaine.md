@@ -112,7 +112,7 @@ Et un statut de plus : **`assigned`**, entre `new` et `in_progress`.
 
 ### R6 — Le backlog
 
-1. À gauche de la grille, les **OT non planifiés et ouverts** (`new`), du plus critique au plus ancien — le même ordre qu'en R5.4.
+1. À gauche de la grille, les **OT non planifiés et ouverts**, du plus critique au plus ancien — le même ordre qu'en R5.4. Ce sont les `new`, et aussi les `in_progress` sans technicien : un OT démarré sans passer par le planning n'apparaîtrait nulle part ailleurs.
 2. C'est la réserve de travail : le dispatcher y puise pour remplir la semaine.
 3. Un OT créé en L1.6 y arrive **automatiquement**, sans action : c'est ce qui relie les deux lots.
 4. Le backlog ne dépend pas de la semaine affichée : un OT non planifié n'a pas de date, il est visible depuis n'importe quelle semaine.

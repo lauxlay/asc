@@ -45,6 +45,7 @@ export const TEST_CONFIG: ApiConfig = {
 export const TEST_USER = {
   id: "user-demo",
   email: "dispatcher@ascenseur.test",
+  name: "Claire Dupont",
   password: "mot-de-passe-de-demo",
   role: "dispatcher",
 } as const;
@@ -70,7 +71,9 @@ export async function createTestApp(): Promise<TestApp> {
     id: TEST_USER.id,
     tenantId: DEFAULT_TENANT_ID,
     email: TEST_USER.email,
+    name: TEST_USER.name,
     role: TEST_USER.role,
+    active: true,
     passwordHash: await testPasswordHash(),
   });
 

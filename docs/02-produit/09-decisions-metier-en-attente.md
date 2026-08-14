@@ -15,7 +15,7 @@ Ce document rassemble ceux qui **méritent une vraie décision métier**, pour q
 | # | Sujet | Origine | Urgence |
 |---|---|---|---|
 | **A1** | Durée du préavis de résiliation | Spec 001 → 005 | **Une feature attend** |
-| B1 | Le gardien : contact du client ou de l'immeuble ? | Spec 003 | Reprise de données si ça change |
+| ~~B1~~ | ~~Le gardien : contact du client ou de l'immeuble ?~~ | Spec 003 | ✅ **Tranchée** — voir ci-dessous |
 | B2 | La liste des types de client est-elle complète ? | Spec 003 | Reprise de données si ça change |
 | B3 | Un immeuble peut-il avoir plusieurs clients ? | Spec 003 | Reprise de données si ça change |
 | B4 | Un appareil peut-il avoir deux contrats actifs ? | Spec 005 | Reprise de données si ça change |
@@ -55,15 +55,17 @@ Ce document rassemble ceux qui **méritent une vraie décision métier**, pour q
 
 Ces choix sont **implémentés et fonctionnels**. Les changer plus tard reste possible, mais suppose de reprendre les données déjà saisies.
 
-### B1 — Le gardien : contact du client ou de l'immeuble ?
+### ~~B1~~ — Le gardien : contact du client ou de l'immeuble ? ✅ tranchée
 
-**Origine** : lot L1.2, spec 003.
+**Origine** : lot L1.2, spec 003. **Tranchée** par `10-benchmark-saisie-incident.md`.
 
-**Le conflit** : le modèle figé (`../03-application/03-modele-donnees.md`) rattache `contact` au **client** (`customer ── contact`). Or le lot s'intitule « clients & contacts (syndic, **gardien**) », et un gardien est le contact d'**un immeuble précis**, pas d'un syndic qui en gère quarante.
+**Le conflit était** : le modèle figé (`../03-application/03-modele-donnees.md`) rattache `contact` au **client** (`customer ── contact`), alors qu'un gardien est le contact d'**un immeuble précis**, pas d'un syndic qui en gère quarante. `contact.siteId` avait été ajouté par défaut, en attente d'arbitrage.
 
-**Ce qui est en place** : `contact.siteId`, nullable. Renseigné = contact d'un immeuble (le gardien) ; vide = interlocuteur du client en général. Un contact rattaché à un immeuble doit appartenir au client de cet immeuble — sinon on ferait fuir de l'information entre clients.
+**Ce qui tranche** : le benchmark de la saisie d'incident exige le **modèle contact→immeubles dès le MVP** (§1) — « un numéro ou un nom tapé dans la recherche doit remonter *Mme Diallo — gardienne, 12 rue des Lilas (2 appareils)* ». C'est exactement ce que permet `contact.siteId`, et c'est ce qui rendra possible le CTI en P2.
 
-**La question** : cette extension du modèle est-elle la bonne, ou le contact doit-il vivre sous le site ? Dans le second cas, c'est `03-modele-donnees.md` qu'il faut amender, pas le code.
+Le lot L1.6 s'en sert immédiatement : le contact de l'immeuble pré-remplit le champ « contact sur place » d'un OT (spec 007, apport B).
+
+**Conclusion** : le champ reste. `03-modele-donnees.md` gagne à être amendé pour refléter que `contact` porte un rattachement optionnel à un site — c'est une mise à jour de doc, pas un changement de code.
 
 ### B2 — La liste des types de client est-elle complète ?
 

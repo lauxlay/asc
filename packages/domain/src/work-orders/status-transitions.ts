@@ -41,14 +41,19 @@ export function isTerminalStatus(status: WorkOrderStatus): boolean {
   return ALLOWED[status].length === 0;
 }
 
-/** Longueur du numéro : 999 999 OT couvrent largement la vie du produit chez une PME. */
-const REFERENCE_DIGITS = 6;
+/**
+ * Longueur du rang : 99 999 OT par an, très au-delà d'une PME — 1 500 appareils
+ * à 9 visites produisent environ 13 500 OT annuels.
+ */
+const REFERENCE_DIGITS = 5;
 
 /**
- * Numéro d'OT lisible à partir d'un rang de séquence (spec 007, R6).
+ * Numéro d'OT lisible (spec 007, R6) : `OT-2026-00042`.
  *
- * `OT-000042` se cite au téléphone et se lit dans un rapport ; un UUID, non.
+ * Année plus rang remis à zéro chaque année, comme un numéro de facture
+ * française. On situe l'OT dans le temps sans rien ouvrir, on classe par année,
+ * et le numéro reste court à dicter au téléphone — ce qu'un UUID n'est pas.
  */
-export function formatWorkOrderReference(sequence: number): string {
-  return `OT-${String(sequence).padStart(REFERENCE_DIGITS, "0")}`;
+export function formatWorkOrderReference(year: number, sequence: number): string {
+  return `OT-${year}-${String(sequence).padStart(REFERENCE_DIGITS, "0")}`;
 }

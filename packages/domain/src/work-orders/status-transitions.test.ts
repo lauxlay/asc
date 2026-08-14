@@ -79,20 +79,27 @@ describe("allowedTransitionsFrom", () => {
 
 describe("formatWorkOrderReference", () => {
   it.each([
-    [1, "OT-000001"],
-    [42, "OT-000042"],
-    [999_999, "OT-999999"],
-  ])("rang %s → %s", (sequence, expected) => {
-    expect(formatWorkOrderReference(sequence)).toBe(expected);
+    [2026, 1, "OT-2026-00001"],
+    [2026, 42, "OT-2026-00042"],
+    [2026, 99_999, "OT-2026-99999"],
+  ])("année %s rang %s → %s", (year, sequence, expected) => {
+    expect(formatWorkOrderReference(year, sequence)).toBe(expected);
   });
 
-  it("ne tronque pas au-delà de six chiffres", () => {
-    expect(formatWorkOrderReference(1_000_000)).toBe("OT-1000000");
+  it("ne tronque pas au-delà de cinq chiffres", () => {
+    expect(formatWorkOrderReference(2026, 100_000)).toBe("OT-2026-100000");
   });
 
-  it("garde l'ordre lexicographique aligné sur l'ordre numérique", () => {
+  it("garde l'ordre lexicographique aligné sur l'ordre chronologique", () => {
     // C'est ce qui permet de trier des références sans les reparser.
-    expect(formatWorkOrderReference(9) < formatWorkOrderReference(10)).toBe(true);
+    expect(formatWorkOrderReference(2026, 9) < formatWorkOrderReference(2026, 10)).toBe(true);
+    expect(formatWorkOrderReference(2026, 99_999) < formatWorkOrderReference(2027, 1)).toBe(true);
+  });
+
+  it("distingue deux rangs identiques d'années différentes", () => {
+    // La remise à zéro annuelle ne doit jamais produire deux fois le même
+    // numéro (spec 007, R6.3).
+    expect(formatWorkOrderReference(2026, 42)).not.toBe(formatWorkOrderReference(2027, 42));
   });
 });
 

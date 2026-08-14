@@ -152,6 +152,20 @@ export const WORK_ORDER_PRIORITIES = ["entrapment", "urgent", "normal"] as const
 export type WorkOrderPriority = (typeof WORK_ORDER_PRIORITIES)[number];
 
 /**
+ * Réponses au script de désincarcération (spec 007, R3).
+ *
+ * Chaque réponse est indépendamment facultative. `null` signifie « pas encore
+ * demandé » et se distingue de `false` qui signifie « demandé, la réponse est
+ * non » : un dispatcher qui n'a pas eu le temps de poser la question ne doit
+ * pas apparaître comme ayant constaté l'absence d'urgence médicale.
+ */
+export interface EntrapmentDetails {
+  readonly medicalEmergency: boolean | null;
+  readonly peopleCount: number | null;
+  readonly betweenFloors: boolean | null;
+}
+
+/**
  * Ordre de travail : l'unité de production de l'ascensoriste.
  *
  * Pas d'`assignee` ni de `scheduledAt` à ce stade : ils arrivent avec le
@@ -161,7 +175,7 @@ export type WorkOrderPriority = (typeof WORK_ORDER_PRIORITIES)[number];
 export interface WorkOrder {
   readonly id: Id;
   readonly tenantId: Id;
-  /** Numéro lisible « OT-000042 » : un UUID ne se cite pas au téléphone. */
+  /** Numéro lisible « OT-2026-00042 » : un UUID ne se cite pas au téléphone. */
   readonly reference: string;
   readonly type: WorkOrderType;
   readonly status: WorkOrderStatus;
@@ -169,7 +183,29 @@ export interface WorkOrder {
   readonly unitId: Id;
   /** Ce que dit l'appelant, en une ligne. */
   readonly summary: string;
-  readonly createdOn: IsoDate;
+  /** Contact sur place et consigne d'accès, pré-rempli depuis l'immeuble. */
+  readonly onSiteContact: string | null;
+  /** OT dont celui-ci prend la suite — « rouvrir » sans rouvrir (spec 007, R5). */
+  readonly followUpOf: Id | null;
+  /**
+   * Nombre de signalements reçus pour cet incident (spec 007, R2).
+   *
+   * Vaut 1 à la création. Cinq signalements en deux heures ne décrivent pas la
+   * même urgence qu'un seul : c'est un signal de pression pour le dispatcher.
+   */
+  readonly reportCount: number;
+  /**
+   * Instant du **premier** signalement, et non jour calendaire.
+   *
+   * Ce n'est pas une entorse à la règle des jours (spec 001, R6) : celle-ci
+   * concerne le calcul d'échéances. Un délai de désincarcération se mesure en
+   * minutes.
+   */
+  readonly reportedAt: string;
+  /** Instant du dernier signalement rattaché. Égal à `reportedAt` au départ. */
+  readonly lastReportedAt: string;
+  /** Renseigné uniquement quand `priority` vaut `entrapment`. */
+  readonly entrapment: EntrapmentDetails | null;
 }
 
 /** Visite périodique. `completedOn` à `null` = planifiée, pas encore réalisée. */

@@ -41,6 +41,58 @@ describe("compareByUrgency", () => {
   it("rend zéro sur deux cartes identiques", () => {
     expect(compareByUrgency(card("a", "normal", NOON), card("b", "normal", NOON))).toBe(0);
   });
+
+  describe("échéance réglementaire", () => {
+    /** Les visites générées naissent toutes au même instant (spec 009). */
+    const visit = (reference: string, dueOn: string) => ({
+      ...card(reference, "normal" as const, NOON),
+      dueOn,
+    });
+
+    it("départage deux visites nées au même instant", () => {
+      expect(
+        compareByUrgency(visit("proche", "2026-09-03"), visit("lointaine", "2027-07-15")),
+      ).toBeLessThan(0);
+    });
+
+    it("place une carte sans échéance devant une carte qui en a une", () => {
+      // Une panne n'a pas de date limite parce qu'elle est due maintenant.
+      expect(
+        compareByUrgency(card("panne", "normal", NOON), visit("visite", "2026-09-03")),
+      ).toBeLessThan(0);
+    });
+
+    it("ne passe jamais avant la criticité", () => {
+      const entrapment = { ...card("bloqué", "entrapment", NOON), dueOn: "2030-01-01" };
+
+      expect(compareByUrgency(entrapment, visit("visite", "2026-09-03"))).toBeLessThan(0);
+    });
+
+    it("laisse l'ancienneté départager à échéance égale", () => {
+      expect(
+        compareByUrgency(visit("ancienne", "2026-09-03"), {
+          ...visit("récente", "2026-09-03"),
+          reportedAt: EVENING,
+        }),
+      ).toBeLessThan(0);
+    });
+
+    it("ordonne un backlog mêlant pannes et visites", () => {
+      const sorted = sortByUrgency([
+        visit("visite-lointaine", "2027-07-15"),
+        card("panne-recente", "normal", EVENING),
+        visit("visite-proche", "2026-09-03"),
+        card("panne-ancienne", "normal", MORNING),
+      ]);
+
+      expect(sorted.map((entry) => entry.reference)).toStrictEqual([
+        "panne-ancienne",
+        "panne-recente",
+        "visite-proche",
+        "visite-lointaine",
+      ]);
+    });
+  });
 });
 
 describe("sortByUrgency", () => {

@@ -135,6 +135,21 @@ describe("génération des visites périodiques", () => {
       expect(await visits()).toStrictEqual([]);
     });
 
+    it("suit un appareil ajouté après coup", async () => {
+      // Le formulaire de création ne demande pas les appareils : ils sont liés
+      // juste après, et la promesse d'onboarding ne tiendrait pas sans ça.
+      const contractId = await createContract({ unitIds: [] });
+
+      await api.inject({
+        method: "PATCH",
+        url: `/api/contracts/${contractId}`,
+        headers: bearer(token),
+        payload: { unitIds: [unitId] },
+      });
+
+      expect(await visits()).toHaveLength(10);
+    });
+
     it("s'arrête à la fin du contrat", async () => {
       const endsOn = new Date(Date.now() + 80 * 86_400_000).toISOString().slice(0, 10);
       // Contrat d'un an minimum exigé par la spec 005 : on part d'hier pour que
@@ -153,18 +168,14 @@ describe("génération des visites périodiques", () => {
   });
 
   describe("POST /contracts/:id/visits", () => {
-    it("rend les compteurs de la génération", async () => {
-      const contractId = await createContract({ unitIds: [] });
+    it("rend des compteurs qui couvrent tout le calendrier", async () => {
+      const contractId = await createContract();
 
-      await api.inject({
-        method: "PATCH",
-        url: `/api/contracts/${contractId}`,
-        headers: bearer(token),
-        payload: { unitIds: [unitId] },
-      });
       const counters = (await generate(contractId)).json<VisitCounters>();
 
-      expect(counters).toMatchObject({ created: 10, alreadyPlanned: 0 });
+      // Les deux compteurs partitionnent le calendrier : chaque échéance est
+      // soit créée par cet appel, soit déjà là.
+      expect(counters.created + counters.alreadyPlanned).toBe(10);
       expect(counters.coveredUntil).not.toBeNull();
     });
 
@@ -272,6 +283,19 @@ describe("génération des visites périodiques", () => {
       ).json<{ backlog: { workOrder: { type: string } }[] }>().backlog;
 
       expect(backlog.filter((card) => card.workOrder.type === "visit")).toHaveLength(10);
+    });
+
+    it("s'ordonnent de la plus proche échéance à la plus lointaine", async () => {
+      // Elles naissent toutes au même instant : sans la clé d'échéance, le
+      // dispatcher verrait la visite la plus lointaine en tête (R6.2).
+      await createContract();
+
+      const backlog = (
+        await api.inject({ method: "GET", url: "/api/planning", headers: bearer(token) })
+      ).json<{ backlog: { workOrder: { dueOn: string | null } }[] }>().backlog;
+
+      const dueDates = backlog.map((card) => card.workOrder.dueOn);
+      expect(dueDates).toStrictEqual([...dueDates].sort());
     });
 
     it("passent après une panne dans l'ordre du backlog", async () => {

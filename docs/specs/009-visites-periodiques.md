@@ -34,8 +34,8 @@ Une panne n'a pas d'échéance réglementaire : `dueOn` y vaut `null`.
 
 ### R1 — Le calendrier
 
-1. Les visites d'un appareil tombent tous les **42 jours** (6 semaines), à partir de la **date de prise d'effet du contrat**. La cadence vient du réglementaire, pas du contrat : rien dans le modèle ne porte de fréquence, et la loi en fixe une seule.
-2. La série est **ancrée sur `startsOn`** : la n-ième visite tombe à `startsOn + n × 42 jours`, quelle que soit la date à laquelle on génère. Deux générations successives produisent donc les mêmes dates.
+1. Les visites d'un appareil tombent tous les **35 jours** (5 semaines), à partir de la **date de prise d'effet du contrat**. La cadence vient du réglementaire, pas du contrat : rien dans le modèle ne porte de fréquence, et la loi en fixe une seule — voir R1.7 pour l'écart avec les 42 jours de la loi.
+2. La série est **ancrée sur `startsOn`** : la n-ième visite tombe à `startsOn + n × 35 jours`, quelle que soit la date à laquelle on génère. Deux générations successives produisent donc les mêmes dates.
 3. **Horizon : 12 mois** à partir du jour de génération. Au-delà, on planifierait un contrat qui peut être résilié.
 4. Aucune visite n'est produite **après `endsOn`** quand le contrat en a un.
 5. Aucune visite n'est produite **dans le passé** : le calendrier sert à préparer, pas à réécrire. Un contrat signé il y a trois ans reprend à sa prochaine échéance à venir.
@@ -68,9 +68,10 @@ Un OT par échéance, avec :
 ### R4 — Quand ça se déclenche
 
 1. **À la création d'un contrat**, automatiquement. C'est la promesse d'onboarding, et c'est le scénario du découpage.
-2. **À la demande**, depuis la fiche du contrat, pour les contrats déjà en base et pour repousser l'horizon.
-3. **Pas de tâche planifiée** : la Phase 0 n'a pas d'ordonnanceur. L'horizon glissant se maintient donc à la main, ce qui est tenable pour douze mois d'avance. Daté en hors scope.
-4. La génération **ne bloque jamais** la création du contrat : si elle échoue, le contrat existe quand même et reste régénérable. Un contrat perdu coûte plus cher qu'un calendrier à relancer.
+2. **Quand les appareils couverts changent**, automatiquement aussi. Sans cela la promesse ne tiendrait pas à l'écran : le formulaire de création ne demande pas les appareils, ils sont liés juste après. Un appareil qui rejoint le contrat repart donc avec ses visites.
+3. **À la demande**, depuis la fiche du contrat, pour les contrats déjà en base et pour repousser l'horizon.
+4. **Pas de tâche planifiée** : la Phase 0 n'a pas d'ordonnanceur. L'horizon glissant se maintient donc à la main, ce qui est tenable pour douze mois d'avance. Daté en hors scope.
+5. La génération **ne bloque jamais** la création ni la modification du contrat : si elle échoue, le contrat existe quand même et reste régénérable. Un contrat perdu coûte plus cher qu'un calendrier à relancer.
 
 ### R5 — Création en lot
 
@@ -81,9 +82,10 @@ Un OT par échéance, avec :
 ### R6 — Ce que le dispatcher voit
 
 1. Les visites générées arrivent au **backlog** du planning, avec leur échéance lisible sur la carte.
-2. Le backlog reste trié par criticité puis ancienneté (spec 008, R6.1). Les visites sont `normal` : elles passent donc **après** les pannes, ce qui est le bon ordre — une panne bloque un immeuble, une visite a trois semaines de marge.
-3. La fiche du contrat montre le nombre de visites générées et l'échéance de la prochaine.
-4. Une visite se planifie **exactement comme un OT ordinaire** : rien de nouveau à apprendre.
+2. Le backlog se trie désormais par **criticité, puis échéance, puis ancienneté**. La clé d'échéance s'ajoute à celles de la spec 008 (R6.1) parce que les visites générées naissent **toutes au même instant** : l'ancienneté ne les départage pas, et le dispatcher verrait la visite la plus lointaine en tête. Une carte **sans** échéance passe devant celles qui en ont une — une panne n'a pas de date limite parce qu'elle est due maintenant, pas parce qu'elle peut attendre.
+3. Les visites sont `normal` : elles passent donc **après** les pannes, ce qui est le bon ordre — une panne bloque un immeuble, une visite a des semaines de marge.
+4. La fiche du contrat montre le nombre de visites générées et l'échéance de la prochaine.
+5. Une visite se planifie **exactement comme un OT ordinaire** : rien de nouveau à apprendre.
 
 ### R7 — Isolation et intégrité (ADR-001)
 

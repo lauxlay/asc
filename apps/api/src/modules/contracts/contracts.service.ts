@@ -100,6 +100,14 @@ export class ContractsService {
     };
     await this.#assertValid(tenantId, updated);
     await this.contracts.save(updated);
+
+    // Un appareil rejoint le contrat : ses visites suivent (spec 009, R4.1).
+    // Sans ça, la promesse d'onboarding ne tiendrait pas à l'écran — le
+    // formulaire de création ne demande pas les appareils, ils sont liés
+    // ensuite. La génération étant idempotente, régénérer ne coûte rien.
+    if (changes.unitIds !== undefined) {
+      await this.visits.generateQuietly(updated);
+    }
     return updated;
   }
 

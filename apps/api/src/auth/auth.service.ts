@@ -35,8 +35,7 @@ export class AuthService {
     // Sur email inconnu, mot de passe faux **ou compte désactivé** (spec 008,
     // R1.9) : même erreur, même message. Rien ne doit permettre d'énumérer les
     // comptes existants ni de distinguer « désactivé » de « inexistant ».
-    const valid =
-      user !== null && user.active && (await verifyPassword(password, user.passwordHash));
+    const valid = user?.active === true && (await verifyPassword(password, user.passwordHash));
     if (!valid || user === null) {
       throw new UnauthorizedException("Identifiants invalides");
     }

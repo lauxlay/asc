@@ -138,6 +138,8 @@ export {
   createWorkOrderRequestSchema,
   entrapmentDetailsRequestSchema,
   entrapmentDetailsResponseSchema,
+  REQUESTABLE_WORK_ORDER_STATUSES,
+  type RequestableWorkOrderStatus,
   requestableWorkOrderStatusSchema,
   type UpdateWorkOrderRequest,
   updateWorkOrderRequestSchema,

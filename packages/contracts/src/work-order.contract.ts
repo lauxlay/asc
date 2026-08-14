@@ -94,12 +94,14 @@ export const createWorkOrderRequestSchema = z.object({
  * planning, jamais en demandant un statut. L'accepter ici permettrait un OT
  * « affecté » sans technicien ni jour.
  */
-export const requestableWorkOrderStatusSchema = z.enum([
+export const REQUESTABLE_WORK_ORDER_STATUSES = [
   "new",
   "in_progress",
   "done",
   "cancelled",
-]) satisfies z.ZodType<Exclude<WorkOrder["status"], "assigned">>;
+] as const satisfies readonly Exclude<WorkOrder["status"], "assigned">[];
+
+export const requestableWorkOrderStatusSchema = z.enum(REQUESTABLE_WORK_ORDER_STATUSES);
 
 /**
  * `PATCH /work-orders/:id/assignment` — le geste du glisser-déposer.
@@ -160,6 +162,7 @@ export const workOrderChainResponseSchema = z.object({
   followedUpBy: z.array(workOrderResponseSchema),
 });
 
+export type RequestableWorkOrderStatus = z.infer<typeof requestableWorkOrderStatusSchema>;
 export type WorkOrderResponse = z.infer<typeof workOrderResponseSchema>;
 export type AssignWorkOrderRequest = z.infer<typeof assignWorkOrderRequestSchema>;
 export type CreateWorkOrderRequest = z.infer<typeof createWorkOrderRequestSchema>;

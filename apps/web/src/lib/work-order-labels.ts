@@ -17,6 +17,9 @@ export const WORK_ORDER_TYPE_LABELS: Readonly<Record<WorkOrderType, string>> = {
 
 export const WORK_ORDER_STATUS_LABELS: Readonly<Record<WorkOrderStatus, string>> = {
   new: "À traiter",
+  // « Planifié » et non « Affecté » : c'est ce que le dispatcher voit dans son
+  // planning, technicien et jour posés ensemble (spec 008, R2).
+  assigned: "Planifié",
   in_progress: "En cours",
   done: "Clôturé",
   cancelled: "Annulé",

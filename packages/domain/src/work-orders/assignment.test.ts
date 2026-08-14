@@ -61,7 +61,9 @@ describe("assignmentRefusal", () => {
   it("laisse réaffecter un OT commencé mais pas le désaffecter", () => {
     // Un technicien tombe malade en cours de journée : on réaffecte. Retirer
     // le technicien effacerait qui a fait le travail déjà commencé.
-    expect(assignmentRefusal("in_progress", { assignee: "user-2", scheduledOn: THURSDAY })).toBeNull();
+    expect(
+      assignmentRefusal("in_progress", { assignee: "user-2", scheduledOn: THURSDAY }),
+    ).toBeNull();
     expect(assignmentRefusal("in_progress", UNPLANNED)).toBe("started_unassign");
   });
 
@@ -145,7 +147,13 @@ describe("isConsistentAssignment", () => {
 
   it("couvre tous les statuts déclarés", () => {
     // Garde-fou : un statut ajouté sans être pensé ici ferait échouer ce test.
-    const covered: readonly WorkOrderStatus[] = ["new", "assigned", "in_progress", "done", "cancelled"];
+    const covered: readonly WorkOrderStatus[] = [
+      "new",
+      "assigned",
+      "in_progress",
+      "done",
+      "cancelled",
+    ];
     expect([...WORK_ORDER_STATUSES]).toStrictEqual([...covered]);
   });
 });

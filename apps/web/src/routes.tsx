@@ -16,8 +16,10 @@ import { CustomerDetailPage } from "@/pages/customer-detail-page";
 import { CustomersPage } from "@/pages/customers-page";
 import { ImportPage } from "@/pages/import-page";
 import { LoginPage } from "@/pages/login-page";
+import { PlanningPage } from "@/pages/planning-page";
 import { SiteDetailPage } from "@/pages/site-detail-page";
 import { SitesPage } from "@/pages/sites-page";
+import { UsersPage } from "@/pages/users-page";
 import { WorkOrderDetailPage } from "@/pages/work-order-detail-page";
 import { WorkOrderNewPage } from "@/pages/work-order-new-page";
 import { WorkOrdersPage } from "@/pages/work-orders-page";
@@ -60,10 +62,20 @@ function AuthenticatedLayout(): React.JSX.Element {
   return (
     <>
       <header className="border-b border-[var(--color-border)]">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4">
           <nav className="flex items-center gap-6">
             <span className="font-semibold">Ascenseur</span>
-            <Link to="/" className="text-sm text-[var(--color-muted-foreground)] hover:underline">
+            <Link
+              to="/"
+              search={{ semaine: undefined }}
+              className="text-sm text-[var(--color-muted-foreground)] hover:underline"
+            >
+              Planning
+            </Link>
+            <Link
+              to="/parc"
+              className="text-sm text-[var(--color-muted-foreground)] hover:underline"
+            >
               Parc
             </Link>
             <Link
@@ -93,6 +105,12 @@ function AuthenticatedLayout(): React.JSX.Element {
             >
               Import
             </Link>
+            <Link
+              to="/utilisateurs"
+              className="text-sm text-[var(--color-muted-foreground)] hover:underline"
+            >
+              Utilisateurs
+            </Link>
           </nav>
           <div className="flex items-center gap-3">
             <span data-testid="session-email" className="text-sm">
@@ -111,16 +129,37 @@ function AuthenticatedLayout(): React.JSX.Element {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+      {/* Élargi au lot L1.7 : le planning porte sept colonnes de jours plus
+          une colonne de techniciens, et 1024 pixels ne suffisaient plus. */}
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
         <Outlet />
       </main>
     </>
   );
 }
 
-const sitesRoute = createRoute({
+/**
+ * Le planning est la page d'accueil, pas un module (`07-principes-ux.md`,
+ * règle 1). La semaine affichée vit dans l'URL : un planning se partage par
+ * lien, et l'état survit à un rechargement (règle 3).
+ */
+const planningRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: "/",
+  validateSearch: (search: Record<string, unknown>) => ({
+    semaine: typeof search.semaine === "string" ? search.semaine : undefined,
+  }),
+  component: PlanningRoute,
+});
+
+function PlanningRoute(): React.JSX.Element {
+  const { semaine } = planningRoute.useSearch();
+  return <PlanningPage week={semaine} />;
+}
+
+const sitesRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/parc",
   component: SitesPage,
 });
 
@@ -185,6 +224,12 @@ const importRoute = createRoute({
   component: ImportPage,
 });
 
+const usersRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: "/utilisateurs",
+  component: UsersPage,
+});
+
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/login",
@@ -193,7 +238,7 @@ const loginRoute = createRoute({
   }),
   beforeLoad: () => {
     if (getSession() !== null) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/", search: { semaine: undefined } });
     }
   },
   component: LoginPage,
@@ -201,6 +246,7 @@ const loginRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   authenticatedRoute.addChildren([
+    planningRoute,
     sitesRoute,
     siteDetailRoute,
     customersRoute,
@@ -212,6 +258,7 @@ const routeTree = rootRoute.addChildren([
     workOrderDetailRoute,
     complianceRoute,
     importRoute,
+    usersRoute,
   ]),
   loginRoute,
 ]);

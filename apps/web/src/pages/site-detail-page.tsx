@@ -83,7 +83,7 @@ export function SiteDetailPage(): React.JSX.Element {
         <p role="alert" className="text-sm text-[var(--color-destructive)]">
           {site.error.message}
         </p>
-        <Link to="/" className="text-sm underline">
+        <Link to="/parc" className="text-sm underline">
           Retour au parc
         </Link>
       </section>
@@ -93,7 +93,7 @@ export function SiteDetailPage(): React.JSX.Element {
   return (
     <section className="space-y-6">
       <div className="space-y-1">
-        <Link to="/" className="text-sm text-[var(--color-muted-foreground)] hover:underline">
+        <Link to="/parc" className="text-sm text-[var(--color-muted-foreground)] hover:underline">
           ← Parc
         </Link>
         <h1 data-testid="site-name" className="text-2xl font-semibold tracking-tight">

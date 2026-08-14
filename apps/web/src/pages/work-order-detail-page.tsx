@@ -1,4 +1,5 @@
-import { allowedTransitionsFrom, type WorkOrderStatus } from "@asc/domain";
+import type { RequestableWorkOrderStatus } from "@asc/contracts";
+import { allowedTransitionsFrom } from "@asc/domain";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
@@ -59,7 +60,8 @@ export function WorkOrderDetailPage(): React.JSX.Element {
   });
 
   const statusMutation = useMutation({
-    mutationFn: (status: WorkOrderStatus) => updateWorkOrder(token, workOrderId, { status }),
+    mutationFn: (status: RequestableWorkOrderStatus) =>
+      updateWorkOrder(token, workOrderId, { status }),
     onSuccess: async () => {
       setError(null);
       await queryClient.invalidateQueries({ queryKey: ["work-orders"] });
@@ -85,7 +87,12 @@ export function WorkOrderDetailPage(): React.JSX.Element {
   const current = workOrder.data;
   const unit = units.data?.items.find((candidate) => candidate.id === current?.unitId);
   const site = sites.data?.items.find((candidate) => candidate.id === unit?.siteId);
-  const transitions = current === undefined ? [] : allowedTransitionsFrom(current.status);
+  // `assigned` ne s'obtient pas en demandant un statut mais en affectant l'OT
+  // au planning (spec 008, R4.2). Le domaine ne le propose jamais ici ; le
+  // filtre le dit au typage.
+  const transitions = (current === undefined ? [] : allowedTransitionsFrom(current.status)).filter(
+    (status): status is RequestableWorkOrderStatus => status !== "assigned",
+  );
 
   return (
     <section className="space-y-6">

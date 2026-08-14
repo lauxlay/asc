@@ -176,7 +176,7 @@ export function ImportPage(): React.JSX.Element {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link to="/">Voir le parc</Link>
+              <Link to="/parc">Voir le parc</Link>
             </Button>
           </CardContent>
         </Card>

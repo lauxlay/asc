@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { signIn } from "./support/session";
+import { openParc, signInToApp } from "./support/session";
 
 /**
  * Parcours contrat du dispatcher (lot L1.4, spec 005).
@@ -20,9 +20,8 @@ const STARTS_ON = "2026-01-01";
 const FIRST_VISIT_DUE_ON = "2026-02-12";
 
 async function openApp(page: Page): Promise<void> {
-  await page.goto("/login");
-  await signIn(page);
-  await expect(page.getByRole("heading", { name: "Parc" })).toBeVisible();
+  await signInToApp(page);
+  await openParc(page);
 }
 
 /** Crée un immeuble et `references.length` appareils, via l'écran de parc. */

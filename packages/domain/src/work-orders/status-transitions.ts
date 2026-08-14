@@ -8,14 +8,22 @@ import type { WorkOrderStatus } from "../entities.js";
  */
 
 /**
- * Transitions autorisées depuis chaque statut.
+ * Transitions **demandables par le client** depuis chaque statut.
  *
  * `done` et `cancelled` ne mènent nulle part : un OT clôturé est une trace de
  * ce qui s'est passé. Le rouvrir effacerait cette trace — on en crée un
  * nouveau.
+ *
+ * `assigned` n'est la cible d'aucune ligne, et c'est délibéré (spec 008,
+ * R4.2) : on n'y entre pas en demandant un statut, mais en affectant l'OT au
+ * planning. L'autoriser ici permettrait un OT `assigned` sans technicien ni
+ * jour — exactement l'incohérence que l'invariant de `assignment.ts` interdit.
+ * Un OT `new` peut en revanche démarrer sans être passé par le planning : un
+ * technicien déjà sur place appelle, le dispatcher note que c'est commencé.
  */
 const ALLOWED: Readonly<Record<WorkOrderStatus, readonly WorkOrderStatus[]>> = {
   new: ["in_progress", "cancelled"],
+  assigned: ["in_progress", "cancelled"],
   in_progress: ["done", "cancelled"],
   done: [],
   cancelled: [],

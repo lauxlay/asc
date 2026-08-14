@@ -17,6 +17,8 @@ const ALL_PAIRS: readonly (readonly [WorkOrderStatus, WorkOrderStatus])[] =
 const PERMITTED: readonly string[] = [
   "new→in_progress",
   "new→cancelled",
+  "assigned→in_progress",
+  "assigned→cancelled",
   "in_progress→done",
   "in_progress→cancelled",
 ];
@@ -53,12 +55,31 @@ describe("canTransition", () => {
   it("ne saute pas l'intervention", () => {
     // Un OT ne peut pas être fait sans avoir commencé.
     expect(canTransition("new", "done")).toBe(false);
+    expect(canTransition("assigned", "done")).toBe(false);
+  });
+
+  it("n'ouvre aucune porte vers `assigned` (spec 008, R4.2)", () => {
+    // On n'entre dans `assigned` qu'en affectant l'OT au planning : l'y faire
+    // entrer par un changement de statut produirait un OT « affecté » sans
+    // technicien ni jour.
+    for (const from of WORK_ORDER_STATUSES) {
+      expect(canTransition(from, "assigned")).toBe(false);
+    }
+  });
+
+  it("laisse un OT planifié démarrer et s'annuler", () => {
+    expect(canTransition("assigned", "in_progress")).toBe(true);
+    expect(canTransition("assigned", "cancelled")).toBe(true);
   });
 });
 
 describe("allowedTransitionsFrom", () => {
   it("rend les suites possibles d'un OT neuf", () => {
     expect(allowedTransitionsFrom("new")).toStrictEqual(["in_progress", "cancelled"]);
+  });
+
+  it("rend les suites possibles d'un OT planifié", () => {
+    expect(allowedTransitionsFrom("assigned")).toStrictEqual(["in_progress", "cancelled"]);
   });
 
   it("rend les suites possibles d'un OT en cours", () => {
@@ -106,6 +127,7 @@ describe("formatWorkOrderReference", () => {
 describe("isTerminalStatus", () => {
   it.each([
     ["new", false],
+    ["assigned", false],
     ["in_progress", false],
     ["done", true],
     ["cancelled", true],

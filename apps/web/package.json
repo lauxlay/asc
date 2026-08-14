@@ -15,6 +15,7 @@
     "@asc/contracts": "workspace:*",
     "@asc/domain": "workspace:*",
     "@asc/ui": "workspace:*",
+    "@dnd-kit/core": "^6.3.1",
     "@radix-ui/react-label": "^2.1.9",
     "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-query": "^5.101.4",

@@ -1,4 +1,6 @@
 import {
+  type AssignWorkOrderRequest,
+  assignWorkOrderRequestSchema,
   type CreateWorkOrderRequest,
   createWorkOrderRequestSchema,
   type UpdateWorkOrderRequest,
@@ -82,6 +84,22 @@ export class WorkOrdersController {
     @Param("id") id: string,
   ): Promise<WorkOrderResponse> {
     return this.workOrders.attachReport(user.tenantId, id);
+  }
+
+  /**
+   * Affecte l'OT ou le renvoie au backlog (spec 008, R2.3).
+   *
+   * Sous-ressource distincte du `PATCH` général : le couple technicien / jour
+   * se pose d'un seul geste, et le statut qui en découle n'est pas négociable
+   * par le client.
+   */
+  @Patch(":id/assignment")
+  async assign(
+    @CurrentUser() user: JwtPayload,
+    @Param("id") id: string,
+    @Body(new ZodValidationPipe(assignWorkOrderRequestSchema)) body: AssignWorkOrderRequest,
+  ): Promise<WorkOrderResponse> {
+    return this.workOrders.assign(user.tenantId, id, body);
   }
 
   @Patch(":id")

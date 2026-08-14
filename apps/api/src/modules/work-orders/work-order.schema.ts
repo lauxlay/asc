@@ -1,4 +1,6 @@
 import {
+  type IsoDate,
+  isIsoDate,
   WORK_ORDER_PRIORITIES,
   WORK_ORDER_STATUSES,
   WORK_ORDER_TYPES,
@@ -17,6 +19,11 @@ import { z } from "zod";
 const timestampSchema = z
   .string()
   .refine((value) => !Number.isNaN(Date.parse(value)), { message: "Horodatage ISO invalide" });
+
+/** Jour calendaire, pas instant — l'affectation se fait à la journée. */
+const isoDateSchema = z.custom<IsoDate>((value) => typeof value === "string" && isIsoDate(value), {
+  message: "Date invalide (attendu YYYY-MM-DD)",
+});
 
 export const entrapmentDetailsSchema = z.object({
   medicalEmergency: z.boolean().nullable(),
@@ -39,6 +46,10 @@ export const workOrderSchema = z.object({
   reportedAt: timestampSchema,
   lastReportedAt: timestampSchema,
   entrapment: entrapmentDetailsSchema.nullable(),
+  // Ajoutés au lot L1.7 sur une collection déjà écrite : un OT existant est
+  // simplement non planifié, ce qui est exactement son état (ADR-002).
+  assignee: z.string().min(1).nullable().default(null),
+  scheduledOn: isoDateSchema.nullable().default(null),
 }) satisfies z.ZodType<WorkOrder>;
 
 /**

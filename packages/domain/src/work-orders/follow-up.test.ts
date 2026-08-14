@@ -20,6 +20,8 @@ function makeWorkOrder(id: string, followUpOf: string | null = null): WorkOrder 
     reportedAt: "2026-01-01T09:00:00.000Z",
     lastReportedAt: "2026-01-01T09:00:00.000Z",
     entrapment: null,
+    assignee: null,
+    scheduledOn: null,
   };
 }
 

@@ -15,6 +15,7 @@ Ce document rassemble ceux qui **méritent une vraie décision métier**, pour q
 | # | Sujet | Origine | Urgence |
 |---|---|---|---|
 | **A1** | Durée du préavis de résiliation | Spec 001 → 005 | **Une feature attend** |
+| **A2** | Qui a le droit de faire quoi ? (rôles) | Spec 008 | **Aucun lot ne la porte** |
 | ~~B1~~ | ~~Le gardien : contact du client ou de l'immeuble ?~~ | Spec 003 | ✅ **Tranchée** — voir ci-dessous |
 | B2 | La liste des types de client est-elle complète ? | Spec 003 | Reprise de données si ça change |
 | B3 | Un immeuble peut-il avoir plusieurs clients ? | Spec 003 | Reprise de données si ça change |
@@ -26,6 +27,8 @@ Ce document rassemble ceux qui **méritent une vraie décision métier**, pour q
 | C3 | Réimport : erreur ou mise à jour ? | Spec 004 | À revoir avec l'usage |
 | C4 | Suppressions : refus ou cascade ? | Specs 002, 003, 005 | À revoir avec l'usage |
 | C5 | Transfert de contrat : refus ou reprise automatique ? | Spec 005 | À revoir avec l'usage |
+| C6 | Le planning doit-il ne montrer que les techniciens ? | Spec 008 | À revoir avec l'usage |
+| C7 | Peut-on dater une intervention sans savoir qui la fera ? | Spec 008 | À revoir avec l'usage |
 
 ---
 
@@ -48,6 +51,23 @@ Ce document rassemble ceux qui **méritent une vraie décision métier**, pour q
 **Pourquoi ça ne s'invente pas** : une alerte de préavis ratée, c'est un contrat reconduit tacitement pour un an contre le gré du client. Une alerte inventée trop tôt ou trop tard est pire que pas d'alerte du tout, parce qu'on lui fera confiance.
 
 **Ce que ça débloque** : un troisième type d'échéance dans le tableau de conformité (L1.5), et les notifications de L3.5.
+
+### A2 — Qui a le droit de faire quoi ?
+
+**Origine** : le lot L1.7 ajoute la gestion des utilisateurs et a dû constater que **le rôle est purement déclaratif** depuis L0.4. Tout utilisateur authentifié peut tout faire : un `accountant` peut supprimer un immeuble, un `technician` peut résilier un contrat, et — depuis ce lot — créer un compte `admin`.
+
+**Ce que disent les docs** : `../03-application/03-modele-donnees.md` fixe quatre rôles (`admin`, `dispatcher`, `technician`, `accountant`) et `06-securite-rgpd.md` évoque le moindre privilège, mais **aucune matrice rôle × permission n'existe**, et **aucun lot du découpage ne porte les autorisations**. Ce n'est pas un oubli de spec : c'est un trou dans la planification.
+
+**La question**, en deux temps :
+
+1. *Produit* : quelle matrice ? Qui crée des utilisateurs, qui signe un contrat, qui supprime un immeuble, qui voit les montants ?
+2. *Planification* : dans quel lot ? Plus tard elle arrive, plus il y a d'endpoints écrits sans elle — et chacun devra être relu un par un.
+
+**Pourquoi ça ne s'invente pas** : une matrice de permissions inventée se découvre en production, quand un utilisateur légitime est bloqué au mauvais moment. À l'inverse, un rôle qui ne protège rien donne une fausse assurance : l'écran affiche « comptable », et le comptable peut tout casser.
+
+**Ce qui atténue le risque aujourd'hui** : Phase 0 mono-tenant, une poignée d'utilisateurs internes d'une même PME qui se connaissent. Le risque devient réel avec le portail client (Phase 4), où des utilisateurs **externes** entrent dans le système.
+
+**Ce que ça débloque** : rien qui attende — d'où le classement. Mais c'est la seule entrée A dont le coût **augmente à chaque lot livré**.
 
 ---
 
@@ -147,3 +167,15 @@ Le produit refuse (`409`) plutôt que de supprimer en cascade, partout :
 ### C5 — Transfert de contrat : refus ou reprise automatique ?
 
 Lier un appareil déjà couvert est refusé (voir B4). Le produit **ne clôt pas automatiquement** le contrat précédent : ce serait une décision commerciale prise à la place de l'utilisateur. À revoir si le changement d'ascensoriste en cours d'année s'avère assez fréquent pour mériter un parcours dédié « reprendre cet appareil au 1er du mois ».
+
+### C6 — Le planning doit-il ne montrer que les techniciens ?
+
+Le planning affiche **une ligne par utilisateur actif, quel que soit son rôle**, et n'importe lequel peut recevoir un OT. Raison : dans une PME de six personnes, le patron et le dispatcher interviennent aussi, et un utilisateur a **un seul rôle** — filtrer sur `technician` rendrait le patron non affectable.
+
+**À surveiller** : chez un ascensoriste de trente personnes dont un comptable et deux commerciaux, le planning affichera trois lignes toujours vides. Le jour où ça gêne, la réponse n'est pas forcément le filtre par rôle — plutôt un indicateur « intervient sur le terrain » porté par l'utilisateur, indépendant de son rôle applicatif.
+
+### C7 — Peut-on dater une intervention sans savoir qui la fera ?
+
+Non : un OT est planifié — technicien **et** jour — ou ne l'est pas (spec 008, R2). Raison : un OT à moitié planifié n'apparaît nulle part et se perd.
+
+**Le cas réel qui pourrait faire changer d'avis** : « cette visite doit se faire jeudi, on verra qui ». Aujourd'hui il reste au backlog, sans sa date. Si le besoin se confirme, la réponse est une ligne « à affecter » par jour dans la grille — un ajout, pas une remise en cause de la règle.

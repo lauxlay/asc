@@ -26,7 +26,16 @@ export interface User {
   readonly id: Id;
   readonly tenantId: Id;
   readonly email: string;
+  /** Nom affiché — en tête de colonne du planning. Un email n'est pas un nom. */
+  readonly name: string;
   readonly role: UserRole;
+  /**
+   * `false` = compte désactivé : ne peut plus se connecter, ne reçoit plus
+   * d'affectation (spec 008, R1.3). Il n'y a pas de suppression : un
+   * utilisateur est référencé par des OT passés, et un planning d'il y a trois
+   * mois doit rester lisible.
+   */
+  readonly active: boolean;
 }
 
 /**
@@ -137,8 +146,14 @@ export const WORK_ORDER_TYPES = ["visit", "breakdown", "repair"] as const;
 
 export type WorkOrderType = (typeof WORK_ORDER_TYPES)[number];
 
-/** Statuts d'un ordre de travail. `done` et `cancelled` sont terminaux (R3.2). */
-export const WORK_ORDER_STATUSES = ["new", "in_progress", "done", "cancelled"] as const;
+/**
+ * Statuts d'un ordre de travail. `done` et `cancelled` sont terminaux (R3.2).
+ *
+ * `assigned` (spec 008, R4) est le seul statut que le client ne choisit
+ * jamais : il est la **conséquence** de l'affectation au planning, posée et
+ * retirée par elle. Voir `work-orders/assignment.ts`.
+ */
+export const WORK_ORDER_STATUSES = ["new", "assigned", "in_progress", "done", "cancelled"] as const;
 
 export type WorkOrderStatus = (typeof WORK_ORDER_STATUSES)[number];
 
@@ -165,13 +180,7 @@ export interface EntrapmentDetails {
   readonly betweenFloors: boolean | null;
 }
 
-/**
- * Ordre de travail : l'unité de production de l'ascensoriste.
- *
- * Pas d'`assignee` ni de `scheduledAt` à ce stade : ils arrivent avec le
- * planning qui les remplit (L1.7). Un champ vide que rien n'écrit serait un
- * champ mort.
- */
+/** Ordre de travail : l'unité de production de l'ascensoriste. */
 export interface WorkOrder {
   readonly id: Id;
   readonly tenantId: Id;
@@ -206,6 +215,17 @@ export interface WorkOrder {
   readonly lastReportedAt: string;
   /** Renseigné uniquement quand `priority` vaut `entrapment`. */
   readonly entrapment: EntrapmentDetails | null;
+  /**
+   * Utilisateur à qui l'OT est confié, et jour d'intervention prévu.
+   *
+   * Les deux vont **toujours ensemble** (spec 008, R2) : un OT est planifié —
+   * les deux renseignés — ou ne l'est pas — les deux à `null`. Un technicien
+   * sans date serait du travail sans échéance, une date sans technicien du
+   * travail que personne ne voit ; les deux disparaîtraient du planning.
+   */
+  readonly assignee: Id | null;
+  /** Jour, pas instant : le dispatcher répartit des journées (spec 008, R3). */
+  readonly scheduledOn: IsoDate | null;
 }
 
 /** Visite périodique. `completedOn` à `null` = planifiée, pas encore réalisée. */

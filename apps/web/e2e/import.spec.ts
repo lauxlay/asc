@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { signIn } from "./support/session";
+import { signInToApp } from "./support/session";
 
 /**
  * Parcours d'import de parc (lot L1.3, spec 004).
@@ -34,9 +34,7 @@ function parcCsv(street: string, count: number): string {
 }
 
 async function openImport(page: Page): Promise<void> {
-  await page.goto("/login");
-  await signIn(page);
-  await expect(page.getByRole("heading", { name: "Parc" })).toBeVisible();
+  await signInToApp(page);
   await page.getByRole("link", { name: "Import" }).click();
   await expect(page.getByRole("heading", { name: "Importer un parc" })).toBeVisible();
 }

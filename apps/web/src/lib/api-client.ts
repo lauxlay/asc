@@ -1,5 +1,6 @@
 import {
   type AnalyzeImportResponse,
+  type AssignWorkOrderRequest,
   analyzeImportResponseSchema,
   type CommitImportResponse,
   type ComplianceDeadlineListResponse,
@@ -14,6 +15,7 @@ import {
   type CreateCustomerRequest,
   type CreateSiteRequest,
   type CreateUnitRequest,
+  type CreateUserRequest,
   type CreateWorkOrderRequest,
   type CustomerListResponse,
   type CustomerResponse,
@@ -31,15 +33,22 @@ import {
   type LoginRequest,
   type LoginResponse,
   loginResponseSchema,
+  type PlanningResponse,
+  planningResponseSchema,
   type SiteListResponse,
   type SiteResponse,
   siteListResponseSchema,
   siteResponseSchema,
   type UnitListResponse,
   type UnitResponse,
+  type UpdateUserRequest,
   type UpdateWorkOrderRequest,
+  type UserListResponse,
+  type UserResponse,
   unitListResponseSchema,
   unitResponseSchema,
+  userListResponseSchema,
+  userResponseSchema,
   type WorkOrderChainResponse,
   type WorkOrderListQuery,
   type WorkOrderListResponse,
@@ -344,6 +353,51 @@ export function updateWorkOrder(
 export function attachWorkOrderReport(token: string, id: string): Promise<WorkOrderResponse> {
   return request(`/work-orders/${encodeURIComponent(id)}/reports`, workOrderResponseSchema, {
     method: "POST",
+    token,
+  });
+}
+
+/**
+ * Affecte l'OT ou le renvoie au backlog (spec 008, R2).
+ *
+ * Les deux champs voyagent **ensemble** : c'est le geste du glisser-déposer,
+ * et le serveur refuse une combinaison mixte.
+ */
+export function assignWorkOrder(
+  token: string,
+  id: string,
+  assignment: AssignWorkOrderRequest,
+): Promise<WorkOrderResponse> {
+  return request(`/work-orders/${encodeURIComponent(id)}/assignment`, workOrderResponseSchema, {
+    method: "PATCH",
+    body: assignment,
+    token,
+  });
+}
+
+/** Semaine de planning. `week` absent = la semaine en cours, résolue par le serveur. */
+export function getPlanning(token: string, week?: string): Promise<PlanningResponse> {
+  const search = week === undefined ? "" : `?week=${encodeURIComponent(week)}`;
+  return request(`/planning${search}`, planningResponseSchema, { token });
+}
+
+export function listUsers(token: string): Promise<UserListResponse> {
+  return request("/users", userListResponseSchema, { token });
+}
+
+export function createUser(token: string, user: CreateUserRequest): Promise<UserResponse> {
+  return request("/users", userResponseSchema, { method: "POST", body: user, token });
+}
+
+/** Désactive, réactive, corrige un nom (spec 008, R1.3). */
+export function updateUser(
+  token: string,
+  id: string,
+  changes: UpdateUserRequest,
+): Promise<UserResponse> {
+  return request(`/users/${encodeURIComponent(id)}`, userResponseSchema, {
+    method: "PATCH",
+    body: changes,
     token,
   });
 }

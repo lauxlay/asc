@@ -31,6 +31,20 @@ const DEMO_SITE_2_ID = "00000000-0000-4000-8000-000000000012";
 const DEMO_CUSTOMER_ID = "00000000-0000-4000-8000-000000000021";
 const DEMO_CONTACT_ID = "00000000-0000-4000-8000-000000000031";
 
+/** Techniciens de démonstration — les lignes du planning (spec 008, R5.2). */
+const DEMO_TECHNICIANS = [
+  {
+    id: "00000000-0000-4000-8000-000000000041",
+    email: "marc.vidal@ascenseur.test",
+    name: "Marc Vidal",
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000042",
+    email: "sofia.mercier@ascenseur.test",
+    name: "Sofia Mercier",
+  },
+] as const;
+
 const DEMO_CUSTOMERS: readonly Customer[] = [
   {
     id: DEMO_CUSTOMER_ID,
@@ -88,9 +102,23 @@ export async function seed(dataDir: string): Promise<void> {
     id: DEMO_USER_ID,
     tenantId: DEFAULT_TENANT_ID,
     email: DEMO_EMAIL,
+    name: "Claire Dupont",
     role: "dispatcher",
+    active: true,
     passwordHash: await hashPassword(DEMO_PASSWORD),
   });
+
+  // Deux techniciens : sans eux le planning n'aurait qu'une ligne, et l'écran
+  // ne montrerait pas ce qu'il sait faire (spec 008).
+  for (const technician of DEMO_TECHNICIANS) {
+    await users.save({
+      ...technician,
+      tenantId: DEFAULT_TENANT_ID,
+      role: "technician",
+      active: true,
+      passwordHash: await hashPassword(DEMO_PASSWORD),
+    });
+  }
 
   // Idempotent : identifiants fixes, `save` remplace au lieu de dupliquer.
   for (const customer of DEMO_CUSTOMERS) {

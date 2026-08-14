@@ -12,6 +12,21 @@ export interface PersistedUser extends User {
 
 /** Port de persistance des utilisateurs (ADR-001). */
 export interface UserRepository {
+  /**
+   * Insère l'utilisateur **si son email est libre dans le tenant**, et rend
+   * `null` si l'email est déjà pris.
+   *
+   * La vérification appartient à l'adaptateur et non au service, pour la même
+   * raison que la numérotation des OT (spec 007, R6.3) : un « je lis, puis
+   * j'écris » côté service laisse deux créations simultanées passer toutes les
+   * deux. Deux comptes du même email, c'est une identité de connexion qui en
+   * désigne deux — l'un des deux ne se connectera jamais.
+   *
+   * L'email est comparé **sans tenir compte de la casse ni des espaces**,
+   * comme `findByEmail`.
+   */
+  createIfEmailFree(user: PersistedUser): Promise<PersistedUser | null>;
+
   /** Recherche par email, **insensible à la casse**. `null` si aucun. */
   findByEmail(tenantId: Id, email: string): Promise<PersistedUser | null>;
 

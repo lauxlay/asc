@@ -121,6 +121,44 @@ export function describeUserRepositoryContract(
       expect(all[0]?.name).toBe("Claire Dupont");
     });
 
+    it("crée l'utilisateur quand l'email est libre", async () => {
+      expect(await repository.createIfEmailFree(makeUser())).not.toBeNull();
+      expect(await repository.findById(TENANT_A, "user-1")).not.toBeNull();
+    });
+
+    it("refuse un email déjà pris, quelle que soit la casse ou les espaces", async () => {
+      await repository.createIfEmailFree(makeUser({ email: "Marc@Ascenseur.test" }));
+
+      const duplicate = await repository.createIfEmailFree(
+        makeUser({ id: "user-2", email: "  marc@ascenseur.TEST  " }),
+      );
+
+      expect(duplicate).toBeNull();
+      expect(await repository.findById(TENANT_A, "user-2")).toBeNull();
+    });
+
+    it("n'accepte qu'une création parmi vingt simultanées sur le même email", async () => {
+      // Le service ne peut pas garantir ça : entre son `findByEmail` et son
+      // écriture, une autre requête passe. L'atomicité appartient à
+      // l'adaptateur — même raison que la numérotation des OT.
+      const attempts = Array.from({ length: 20 }, (_, index) =>
+        repository.createIfEmailFree(makeUser({ id: `user-${index}` })),
+      );
+
+      const created = (await Promise.all(attempts)).filter((user) => user !== null);
+
+      expect(created).toHaveLength(1);
+      expect(await repository.findAll(TENANT_A)).toHaveLength(1);
+    });
+
+    it("laisse le même email être créé dans deux tenants", async () => {
+      await repository.createIfEmailFree(makeUser({ id: "user-a", tenantId: TENANT_A }));
+
+      expect(
+        await repository.createIfEmailFree(makeUser({ id: "user-b", tenantId: TENANT_B })),
+      ).not.toBeNull();
+    });
+
     it("laisse le même email exister dans deux tenants", async () => {
       await repository.save(makeUser({ id: "user-a", tenantId: TENANT_A }));
       await repository.save(makeUser({ id: "user-b", tenantId: TENANT_B }));

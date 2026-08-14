@@ -45,8 +45,6 @@ export class UsersService {
    * ni lien de réinitialisation.
    */
   async create(tenantId: Id, input: CreateUserRequest): Promise<User> {
-    await this.#assertEmailAvailable(tenantId, input.email);
-
     const user: PersistedUser = {
       id: randomUUID(),
       tenantId,
@@ -56,8 +54,15 @@ export class UsersService {
       active: true,
       passwordHash: await hashPassword(input.password),
     };
-    await this.users.save(user);
-    return toUser(user);
+
+    // L'unicité de l'email est tranchée par l'adaptateur, pas ici (R1.7) : un
+    // « je vérifie puis j'écris » depuis le service laisserait deux créations
+    // simultanées passer toutes les deux.
+    const created = await this.users.createIfEmailFree(user);
+    if (created === null) {
+      throw new ConflictException(`L'email ${input.email} est déjà utilisé`);
+    }
+    return toUser(created);
   }
 
   /**
@@ -91,13 +96,6 @@ export class UsersService {
       throw new NotFoundException(`Utilisateur ${id} introuvable`);
     }
     return user;
-  }
-
-  /** Unicité insensible à la casse, portée par le port (R1.7). */
-  async #assertEmailAvailable(tenantId: Id, email: string): Promise<void> {
-    if ((await this.users.findByEmail(tenantId, email)) !== null) {
-      throw new ConflictException(`L'email ${email} est déjà utilisé`);
-    }
   }
 }
 

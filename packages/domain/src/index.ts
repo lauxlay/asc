@@ -97,6 +97,18 @@ export {
   type PlannedUnit,
   siteKeyOf,
 } from "./import/import-plan.js";
+export {
+  compareSearchResults,
+  MATCH_QUALITIES,
+  MAX_SEARCH_RESULTS,
+  type MatchQuality,
+  MIN_SEARCH_LENGTH,
+  matchQualityOf,
+  type RankedResult,
+  rankSearchResults,
+  SEARCH_KINDS,
+  type SearchKind,
+} from "./search/global-search.js";
 export { normalizeSearchText, siteMatchesQuery } from "./sites/site-search.js";
 export {
   type AssignmentRefusal,

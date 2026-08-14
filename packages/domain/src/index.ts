@@ -40,6 +40,13 @@ export {
   isoDate,
 } from "./date/iso-date.js";
 export {
+  DAYS_PER_WEEK,
+  dayOfWeek,
+  isSameWeek,
+  startOfWeek,
+  weekDays,
+} from "./date/week.js";
+export {
   CONTRACT_TYPES,
   type Contact,
   type Contract,
@@ -83,6 +90,21 @@ export {
   siteKeyOf,
 } from "./import/import-plan.js";
 export { normalizeSearchText, siteMatchesQuery } from "./sites/site-search.js";
+export {
+  type AssignmentRefusal,
+  assignmentRefusal,
+  isCoherentAssignment,
+  isConsistentAssignment,
+  isPlanned,
+  isUnplanned,
+  statusAfterAssignment,
+  type WorkOrderAssignment,
+} from "./work-orders/assignment.js";
+export {
+  compareByUrgency,
+  type DispatchOrdered,
+  sortByUrgency,
+} from "./work-orders/dispatch-order.js";
 export {
   followedUpBy,
   followUpChainOf,

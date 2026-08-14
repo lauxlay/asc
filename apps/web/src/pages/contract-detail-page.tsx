@@ -64,6 +64,10 @@ export function ContractDetailPage(): React.JSX.Element {
     onSuccess: async () => {
       setError(null);
       await queryClient.invalidateQueries({ queryKey: ["contracts"] });
+      // Lier un appareil génère ses visites côté serveur (spec 009, R4.2) :
+      // sans ces invalidations, l'écran continuerait d'en annoncer zéro.
+      await queryClient.invalidateQueries({ queryKey: ["work-orders"] });
+      await queryClient.invalidateQueries({ queryKey: ["planning"] });
     },
     onError: (cause: unknown) => {
       setError(cause instanceof Error ? cause.message : "Modification impossible");

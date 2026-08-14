@@ -28,6 +28,8 @@ import {
   contractResponseSchema,
   customerListResponseSchema,
   customerResponseSchema,
+  type GenerateVisitsResponse,
+  generateVisitsResponseSchema,
   type ImportIssue,
   importIssueSchema,
   type LoginRequest,
@@ -355,6 +357,23 @@ export function attachWorkOrderReport(token: string, id: string): Promise<WorkOr
     method: "POST",
     token,
   });
+}
+
+/**
+ * Génère les visites périodiques du contrat sur douze mois (spec 009).
+ *
+ * Additive et idempotente : répétée, elle ne crée rien de plus et ne défait
+ * rien. Les compteurs rendus disent ce qui a été fait.
+ */
+export function generateContractVisits(
+  token: string,
+  contractId: string,
+): Promise<GenerateVisitsResponse> {
+  return request(
+    `/contracts/${encodeURIComponent(contractId)}/visits`,
+    generateVisitsResponseSchema,
+    { method: "POST", token },
+  );
 }
 
 /**

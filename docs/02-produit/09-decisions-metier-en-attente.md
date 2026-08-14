@@ -22,6 +22,7 @@ Ce document rassemble ceux qui **méritent une vraie décision métier**, pour q
 | B4 | Un appareil peut-il avoir deux contrats actifs ? | Spec 005 | Reprise de données si ça change |
 | B5 | Appareils sans repère hérités : défaut ou reprise ? | Lot L1.1 | Reprise de données si ça change |
 | B6 | Faut-il un soft delete ? | Spec 003 | Reprise de données si ça change |
+| B7 | Quelle marge sur la cadence des visites ? | Spec 009 | Reprise de données si ça change |
 | C1 | Le rôle d'un contact : texte libre ou liste fermée ? | Spec 003 | À revoir avec l'usage |
 | C2 | Faut-il contraindre le code postal ? | Spec 002 | À revoir avec l'usage |
 | C3 | Réimport : erreur ou mise à jour ? | Spec 004 | À revoir avec l'usage |
@@ -134,6 +135,20 @@ Le lot L1.6 s'en sert immédiatement : le contact de l'immeuble pré-remplit le 
 **Ce qui est en place** : **rien**. Les suppressions sont réelles. Aucune feature ne consomme encore un état « supprimé », et l'implémenter sans besoin aurait ajouté un filtre à chaque lecture.
 
 **La question** : quel est le premier besoin réel — restauration après fausse manœuvre, piste d'audit, obligation RGPD ? La réponse détermine si c'est un soft delete, un journal d'événements, ou les deux.
+
+### B7 — Quelle marge sur la cadence des visites ?
+
+**Origine** : lot L1.8, spec 009. Il a fallu choisir un intervalle pour **générer** les visites d'un contrat.
+
+**Ce que disent les docs** : `05-conformite-reglementaire.md` fixe « **au moins une** toutes les 6 semaines (~8–9/an) ». C'est un **plafond légal**, pas une cadence de production.
+
+**Ce qui est en place** : les visites sont générées tous les **35 jours** (5 semaines). Générer pile à 42 jours ne laisserait aucune marge : la moindre visite reportée d'un jour — technicien malade, accès impossible, immeuble en travaux — met l'appareil en infraction, et le tableau de conformité passe au rouge sans que personne ait mal travaillé. Cinq semaines laissent une semaine de rattrapage.
+
+**Le coût du choix** : 10,4 visites par appareil et par an au lieu de 8,7, soit **~20 % de charge en plus**. Sur un parc de 200 appareils, environ 350 interventions annuelles supplémentaires. Ce n'est pas neutre commercialement.
+
+**La question** : quelle marge l'ascensoriste veut-il vraiment ? Trois réponses défendables — 42 jours et on assume le risque, 35 jours et on paie la marge, ou une marge **paramétrable par tenant**, voire par contrat pour un client « premium ».
+
+**Pourquoi ça ne s'invente pas durablement** : c'est un arbitrage entre risque réglementaire et coût de main-d'œuvre, c'est-à-dire une décision de dirigeant. **À surveiller** : changer la cadence plus tard n'est pas gratuit — les visites déjà générées gardent l'ancienne, et il faudra les régénérer.
 
 ---
 

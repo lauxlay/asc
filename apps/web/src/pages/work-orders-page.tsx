@@ -113,6 +113,7 @@ export function WorkOrdersPage(): React.JSX.Element {
                   <th className="py-1 pr-4 font-medium">Objet</th>
                   <th className="py-1 pr-4 font-medium">Criticité</th>
                   <th className="py-1 pr-4 font-medium">Statut</th>
+                  <th className="py-1 pr-4 font-medium">Échéance</th>
                   <th className="py-1 font-medium">Signalé</th>
                 </tr>
               </thead>
@@ -147,6 +148,10 @@ export function WorkOrdersPage(): React.JSX.Element {
                         {WORK_ORDER_PRIORITY_LABELS[workOrder.priority]}
                       </td>
                       <td className="py-1 pr-4">{WORK_ORDER_STATUS_LABELS[workOrder.status]}</td>
+                      {/* Seules les visites générées ont une date limite. */}
+                      <td className="py-1 pr-4 text-[var(--color-muted-foreground)]">
+                        {workOrder.dueOn ?? "—"}
+                      </td>
                       <td className="py-1 text-[var(--color-muted-foreground)]">
                         {timeAgo(workOrder.reportedAt)}
                       </td>

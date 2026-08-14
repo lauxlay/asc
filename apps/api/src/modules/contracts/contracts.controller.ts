@@ -6,6 +6,7 @@ import {
   type CreateContractRequest,
   contractListQuerySchema,
   createContractRequestSchema,
+  type GenerateVisitsResponse,
   type UpdateContractRequest,
   updateContractRequestSchema,
 } from "@asc/contracts";
@@ -58,6 +59,22 @@ export class ContractsController {
     @Param("id") id: string,
   ): Promise<ComplianceDeadlineListResponse> {
     return this.contracts.deadlinesOf(user.tenantId, id);
+  }
+
+  /**
+   * Génère les visites périodiques du contrat sur douze mois (spec 009).
+   *
+   * `POST` et non `PUT` : l'appel **ajoute** ce qui manque, il ne remplace
+   * rien. Répété, il est sans effet — l'idempotence vient de la clé naturelle
+   * (appareil, jour), pas du verbe.
+   */
+  @Post(":id/visits")
+  @HttpCode(HttpStatus.OK)
+  async generateVisits(
+    @CurrentUser() user: JwtPayload,
+    @Param("id") id: string,
+  ): Promise<GenerateVisitsResponse> {
+    return this.contracts.generateVisits(user.tenantId, id);
   }
 
   @Post()

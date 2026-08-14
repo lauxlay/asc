@@ -168,3 +168,35 @@ describe("ordres de travail écrits avant le lot L1.7", () => {
     expect(workOrder?.reference).toBe("OT-2026-00001");
   });
 });
+
+describe("ordres de travail écrits avant le lot L1.8", () => {
+  it("se lisent sans dueOn : une panne n'a pas d'échéance réglementaire", async () => {
+    await writeLegacyCollection("work_orders", [
+      {
+        id: "wo-1",
+        tenantId: TENANT,
+        reference: "OT-2026-00002",
+        type: "breakdown",
+        status: "assigned",
+        priority: "normal",
+        unitId: "unit-1",
+        summary: "Porte qui grince",
+        onSiteContact: null,
+        followUpOf: null,
+        reportCount: 1,
+        reportedAt: "2026-08-13T08:00:00.000Z",
+        lastReportedAt: "2026-08-13T08:00:00.000Z",
+        entrapment: null,
+        assignee: "user-1",
+        scheduledOn: "2026-08-13",
+      },
+    ]);
+
+    const workOrder = await new JsonWorkOrderRepository(store).findById(TENANT, "wo-1");
+
+    expect(workOrder?.dueOn).toBeNull();
+    // L'affectation déjà écrite survit intacte à l'ajout du champ.
+    expect(workOrder?.assignee).toBe("user-1");
+    expect(workOrder?.scheduledOn).toBe("2026-08-13");
+  });
+});

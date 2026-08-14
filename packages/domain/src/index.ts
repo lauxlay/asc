@@ -25,6 +25,14 @@ export {
   periodsOverlap,
 } from "./contracts/contract-rules.js";
 export {
+  missingVisits,
+  type ScheduledVisit,
+  scheduleVisits,
+  VISIT_SCHEDULE_HORIZON_MONTHS,
+  VISIT_SCHEDULE_INTERVAL_DAYS,
+  visitKey,
+} from "./contracts/visit-schedule.js";
+export {
   addDays,
   addMonths,
   addWeeks,

@@ -24,6 +24,19 @@ export interface WorkOrderRepository {
    */
   create(draft: WorkOrderDraft): Promise<WorkOrder>;
 
+  /**
+   * Insère plusieurs OT **en une seule écriture**, avec des références
+   * consécutives (spec 009, R5).
+   *
+   * Un contrat de 50 appareils produit près de 500 visites d'un coup. Les créer
+   * une par une, ce serait 500 lectures-écritures du fichier entier — et autant
+   * d'occasions de laisser la collection à moitié écrite si le processus
+   * s'arrête. Le lot est atomique : tout ou rien.
+   *
+   * Une liste vide ne touche à rien et ne consomme aucun rang.
+   */
+  createMany(drafts: readonly WorkOrderDraft[]): Promise<readonly WorkOrder[]>;
+
   /** `null` si l'OT n'existe pas **ou** appartient à un autre tenant. */
   findById(tenantId: Id, id: Id): Promise<WorkOrder | null>;
 

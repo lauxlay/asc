@@ -102,6 +102,9 @@ export class WorkOrdersService {
       // Un OT naît au backlog : c'est le planning qui l'en sort (spec 008, R6.3).
       assignee: null,
       scheduledOn: null,
+      // Seules les visites générées portent une échéance réglementaire : rien
+      // n'oblige une panne à être traitée un jour donné (spec 009).
+      dueOn: null,
     };
 
     return this.workOrders.create(draft);

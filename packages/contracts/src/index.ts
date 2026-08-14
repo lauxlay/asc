@@ -66,6 +66,8 @@ export {
   createContractRequestSchema,
   deadlineKindSchema,
   deadlineStatusSchema,
+  type GenerateVisitsResponse,
+  generateVisitsResponseSchema,
   type UpdateContractRequest,
   updateContractRequestSchema,
 } from "./maintenance-contract.contract.js";

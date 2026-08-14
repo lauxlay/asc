@@ -226,6 +226,17 @@ export interface WorkOrder {
   readonly assignee: Id | null;
   /** Jour, pas instant : le dispatcher répartit des journées (spec 008, R3). */
   readonly scheduledOn: IsoDate | null;
+  /**
+   * Date **limite réglementaire**, portée par les visites générées (spec 009).
+   *
+   * À ne pas confondre avec `scheduledOn` : l'un dit quand il *faut* que ce
+   * soit fait, l'autre quand on a *prévu* de le faire. Une visite générée a une
+   * échéance dès sa naissance et aucun technicien — ce que `scheduledOn` seul
+   * ne saurait pas représenter sans casser la règle « planifié = les deux ».
+   *
+   * `null` sur une panne : rien ne la rendait obligatoire à une date donnée.
+   */
+  readonly dueOn: IsoDate | null;
 }
 
 /** Visite périodique. `completedOn` à `null` = planifiée, pas encore réalisée. */

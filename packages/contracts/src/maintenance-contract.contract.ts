@@ -37,6 +37,22 @@ export const createContractRequestSchema = z.object({
   endsOn: isoDateSchema.nullable().default(null),
 });
 
+/**
+ * `POST /contracts/:id/visits` — génération des visites périodiques (spec 009).
+ *
+ * Les deux compteurs comptent : sans le nombre d'existantes, l'utilisateur qui
+ * regénère ne saurait pas si son clic a fait quelque chose ou si tout était
+ * déjà là.
+ */
+export const generateVisitsResponseSchema = z.object({
+  /** OT de visite réellement créés par cet appel. */
+  created: z.number().int().nonnegative(),
+  /** Échéances qui portaient déjà une visite, laissées intactes (R3.2). */
+  alreadyPlanned: z.number().int().nonnegative(),
+  /** Dernier jour couvert par le calendrier, `null` si rien n'est dû. */
+  coveredUntil: isoDateSchema.nullable(),
+});
+
 /** `PATCH` : seuls les champs fournis sont modifiés. */
 export const updateContractRequestSchema = z
   .object({
@@ -88,3 +104,4 @@ export type ContractListResponse = z.infer<typeof contractListResponseSchema>;
 export type ContractListQuery = z.infer<typeof contractListQuerySchema>;
 export type ComplianceDeadlineResponse = z.infer<typeof complianceDeadlineResponseSchema>;
 export type ComplianceDeadlineListResponse = z.infer<typeof complianceDeadlineListResponseSchema>;
+export type GenerateVisitsResponse = z.infer<typeof generateVisitsResponseSchema>;

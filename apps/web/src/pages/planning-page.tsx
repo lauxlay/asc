@@ -1,11 +1,13 @@
 import type { PlanningCard as PlanningCardData, PlanningResponse } from "@asc/contracts";
 import { addDays, isIsoDate, isoDate, startOfWeek } from "@asc/domain";
 import {
+  type CollisionDetection,
   closestCenter,
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
+  rectIntersection,
   useDraggable,
   useDroppable,
   useSensor,
@@ -31,6 +33,22 @@ import { WORK_ORDER_PRIORITY_CLASS, WORK_ORDER_TYPE_LABELS } from "@/lib/work-or
  */
 
 const BACKLOG_ID = "backlog";
+
+/**
+ * Zone survolée : **ce que la carte recouvre**, et seulement à défaut la plus
+ * proche.
+ *
+ * `closestCenter` seul compare des centres, et le backlog est une colonne qui
+ * s'allonge à chaque visite générée. Une carte prise en haut d'un backlog de
+ * dix cartes se retrouve alors plus près du centre d'une case de la grille que
+ * de celui de son propre backlog : dnd-kit annonce une case avant le moindre
+ * mouvement, et un dépôt sans déplacement affecterait l'OT à un technicien
+ * qu'on n'a pas choisi.
+ */
+const overlapFirst: CollisionDetection = (args) => {
+  const overlapping = rectIntersection(args);
+  return overlapping.length > 0 ? overlapping : closestCenter(args);
+};
 
 /** `cell:<utilisateur>:<jour>` — l'identifiant porte l'affectation entière. */
 function cellId(userId: string, day: string): string {
@@ -187,7 +205,7 @@ export function PlanningPage({ week }: { week: string | undefined }): React.JSX.
       ) : (
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCenter}
+          collisionDetection={overlapFirst}
           onDragEnd={handleDragEnd}
           accessibility={{
             screenReaderInstructions: {
@@ -354,6 +372,13 @@ function WorkOrderCard({ card }: { card: PlanningCardData }): React.JSX.Element 
         {WORK_ORDER_TYPE_LABELS[workOrder.type]} · {card.siteName}
       </span>
       <span className="block text-[var(--color-muted-foreground)]">{card.unitReference}</span>
+      {/* Échéance réglementaire des visites générées (spec 009, R6.1) : c'est
+          elle qui dit au dispatcher dans quel ordre vider le backlog. */}
+      {workOrder.dueOn !== null && (
+        <span className="block text-[var(--color-muted-foreground)]">
+          à faire avant le {formatDay(workOrder.dueOn)}
+        </span>
+      )}
     </div>
   );
 }

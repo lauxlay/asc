@@ -22,6 +22,7 @@ function makeWorkOrder(id: string, followUpOf: string | null = null): WorkOrder 
     entrapment: null,
     assignee: null,
     scheduledOn: null,
+    dueOn: null,
   };
 }
 

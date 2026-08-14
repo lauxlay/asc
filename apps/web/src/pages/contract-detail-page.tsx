@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
+  generateContractVisits,
   getContract,
   listContractDeadlines,
   listSites,
   listUnits,
+  listWorkOrders,
   setContractUnits,
 } from "@/lib/api-client";
 import { useSession } from "@/lib/auth";
@@ -68,6 +70,26 @@ export function ContractDetailPage(): React.JSX.Element {
     },
   });
 
+  /** Visites déjà posées pour les appareils du contrat (spec 009, R6.3). */
+  const visits = useQuery({
+    queryKey: ["work-orders", { type: "visit" }],
+    queryFn: () => listWorkOrders(token, { type: "visit" }),
+    enabled: token !== "",
+  });
+
+  const generateMutation = useMutation({
+    mutationFn: () => generateContractVisits(token, contractId),
+    onSuccess: async () => {
+      setError(null);
+      // Le backlog du planning et la liste des OT changent tous les deux.
+      await queryClient.invalidateQueries({ queryKey: ["work-orders"] });
+      await queryClient.invalidateQueries({ queryKey: ["planning"] });
+    },
+    onError: (cause: unknown) => {
+      setError(cause instanceof Error ? cause.message : "Génération impossible");
+    },
+  });
+
   if (contract.error !== null) {
     return (
       <section className="space-y-4">
@@ -90,6 +112,16 @@ export function ContractDetailPage(): React.JSX.Element {
 
   const labelOf = (unit: (typeof allUnits)[number]): string =>
     `${siteNameById.get(unit.siteId) ?? "Immeuble inconnu"} — ${unit.reference}`;
+
+  // Les visites de ce contrat : celles des appareils qu'il couvre, encore à
+  // faire. Une visite clôturée n'est plus « au planning ».
+  const plannedVisits = (visits.data?.items ?? []).filter(
+    (visit) =>
+      linkedIds.includes(visit.unitId) && visit.status !== "done" && visit.status !== "cancelled",
+  );
+  const nextVisit = [...plannedVisits]
+    .filter((visit) => visit.dueOn !== null)
+    .sort((left, right) => (left.dueOn ?? "").localeCompare(right.dueOn ?? ""))[0];
 
   return (
     <section className="space-y-6">
@@ -187,6 +219,31 @@ export function ContractDetailPage(): React.JSX.Element {
             ))}
           </ul>
         )}
+      </div>
+
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold">Visites périodiques</h2>
+        <p className="text-sm text-[var(--color-muted-foreground)]">
+          {plannedVisits.length} visite{plannedVisits.length > 1 ? "s" : ""} au planning
+          {nextVisit === undefined ? "." : `, la prochaine due le ${nextVisit.dueOn}.`} Les visites
+          générées attendent au backlog du planning.
+        </p>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => generateMutation.mutate()}
+            disabled={generateMutation.isPending}
+          >
+            Générer sur 12 mois
+          </Button>
+          {generateMutation.data !== undefined && (
+            <span data-testid="generation-result" className="text-sm">
+              {generateMutation.data.created === 0
+                ? "Tout était déjà planifié."
+                : `${generateMutation.data.created} visite${generateMutation.data.created > 1 ? "s" : ""} créée${generateMutation.data.created > 1 ? "s" : ""}.`}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">

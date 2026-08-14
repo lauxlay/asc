@@ -354,6 +354,13 @@ function WorkOrderCard({ card }: { card: PlanningCardData }): React.JSX.Element 
         {WORK_ORDER_TYPE_LABELS[workOrder.type]} · {card.siteName}
       </span>
       <span className="block text-[var(--color-muted-foreground)]">{card.unitReference}</span>
+      {/* Échéance réglementaire des visites générées (spec 009, R6.1) : c'est
+          elle qui dit au dispatcher dans quel ordre vider le backlog. */}
+      {workOrder.dueOn !== null && (
+        <span className="block text-[var(--color-muted-foreground)]">
+          à faire avant le {formatDay(workOrder.dueOn)}
+        </span>
+      )}
     </div>
   );
 }

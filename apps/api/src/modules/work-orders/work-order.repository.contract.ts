@@ -1,3 +1,4 @@
+import { isoDate } from "@asc/domain";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { WorkOrderDraft, WorkOrderRepository } from "./work-order.repository.js";
 
@@ -36,6 +37,7 @@ function makeDraft(overrides: Partial<WorkOrderDraft> = {}): WorkOrderDraft {
     // Un OT naît au backlog (spec 008, R6.3).
     assignee: null,
     scheduledOn: null,
+    dueOn: null,
     ...overrides,
   };
 }
@@ -134,6 +136,83 @@ export function describeWorkOrderRepositoryContract(
         const references = new Set(created.map((workOrder) => workOrder.reference));
 
         expect(references.size).toBe(drafts.length);
+      });
+    });
+
+    /** Spec 009, R5 — création en lot des visites générées. */
+    describe("createMany", () => {
+      it("crée tout le lot en une fois", async () => {
+        const drafts = Array.from({ length: 5 }, (_value, index) =>
+          makeDraft({ id: `wo-${index}`, type: "visit" }),
+        );
+
+        const created = await repository.createMany(drafts);
+
+        expect(created).toHaveLength(5);
+        expect(await repository.findAll(TENANT_A)).toHaveLength(5);
+      });
+
+      it("attribue des références consécutives et sans trou", async () => {
+        const drafts = Array.from({ length: 4 }, (_value, index) =>
+          makeDraft({ id: `wo-${index}` }),
+        );
+
+        const references = (await repository.createMany(drafts)).map(
+          (workOrder) => workOrder.reference,
+        );
+
+        expect(references).toStrictEqual([
+          "OT-2026-00001",
+          "OT-2026-00002",
+          "OT-2026-00003",
+          "OT-2026-00004",
+        ]);
+      });
+
+      it("reprend la séquence après une création à l'unité", async () => {
+        await repository.create(makeDraft({ id: "wo-seul" }));
+
+        const created = await repository.createMany([makeDraft({ id: "wo-lot" })]);
+
+        expect(created[0]?.reference).toBe("OT-2026-00002");
+      });
+
+      it("laisse la séquence intacte sur un lot vide", async () => {
+        expect(await repository.createMany([])).toStrictEqual([]);
+
+        const next = await repository.create(makeDraft({ id: "wo-apres" }));
+        expect(next.reference).toBe("OT-2026-00001");
+      });
+
+      it("ne mélange pas deux lots concurrents", async () => {
+        // Réserver les rangs un par un laisserait une autre requête s'intercaler
+        // au milieu d'un lot : les références d'une même génération ne seraient
+        // plus contiguës.
+        const batch = (prefix: string) =>
+          repository.createMany(
+            Array.from({ length: 10 }, (_value, index) => makeDraft({ id: `${prefix}-${index}` })),
+          );
+
+        const [first, second] = await Promise.all([batch("a"), batch("b")]);
+        const rankOf = (reference: string) => Number(reference.slice(-5));
+
+        for (const created of [first, second]) {
+          const ranks = created.map((workOrder) => rankOf(workOrder.reference));
+          expect(ranks).toStrictEqual(
+            Array.from({ length: 10 }, (_value, index) => (ranks[0] ?? 0) + index),
+          );
+        }
+        const all = [...first, ...second].map((workOrder) => workOrder.reference);
+        expect(new Set(all).size).toBe(20);
+      });
+
+      it("porte l'échéance réglementaire des visites générées", async () => {
+        const created = await repository.createMany([
+          makeDraft({ id: "wo-visite", type: "visit", dueOn: isoDate("2026-04-16") }),
+        ]);
+
+        expect(created[0]?.dueOn).toBe("2026-04-16");
+        expect((await repository.findById(TENANT_A, "wo-visite"))?.dueOn).toBe("2026-04-16");
       });
     });
 

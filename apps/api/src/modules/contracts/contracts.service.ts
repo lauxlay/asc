@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type {
   ComplianceDeadlineListResponse,
   CreateContractRequest,
+  GenerateVisitsResponse,
   UpdateContractRequest,
 } from "@asc/contracts";
 import {
@@ -27,6 +28,7 @@ import { CONTRACT_REPOSITORY, SITE_REPOSITORY, UNIT_REPOSITORY } from "../../com
 import type { SiteRepository } from "../sites/site.repository.js";
 import type { UnitRepository } from "../units/unit.repository.js";
 import type { ContractRepository } from "./contract.repository.js";
+import { VisitGenerationService } from "./visit-generation.service.js";
 
 /**
  * Orchestration des contrats d'entretien (spec 005).
@@ -41,7 +43,13 @@ export class ContractsService {
     @Inject(CONTRACT_REPOSITORY) private readonly contracts: ContractRepository,
     @Inject(UNIT_REPOSITORY) private readonly units: UnitRepository,
     @Inject(SITE_REPOSITORY) private readonly sites: SiteRepository,
+    @Inject(VisitGenerationService) private readonly visits: VisitGenerationService,
   ) {}
+
+  /** Génération à la demande, depuis la fiche du contrat (spec 009, R4.2). */
+  async generateVisits(tenantId: Id, id: Id): Promise<GenerateVisitsResponse> {
+    return this.visits.generate(await this.getById(tenantId, id));
+  }
 
   /** `unitId` restreint la liste aux contrats couvrant un appareil. */
   async list(tenantId: Id, unitId: Id | undefined): Promise<readonly Contract[]> {
@@ -73,6 +81,9 @@ export class ContractsService {
     };
     await this.#assertValid(tenantId, contract);
     await this.contracts.save(contract);
+    // Promesse d'onboarding : signer un client et voir son planning se remplir
+    // le jour même (spec 009, R4.1). Sans effet de bord en cas d'échec.
+    await this.visits.generateQuietly(contract);
     return contract;
   }
 

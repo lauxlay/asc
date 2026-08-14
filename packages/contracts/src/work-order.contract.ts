@@ -67,6 +67,7 @@ export const workOrderResponseSchema = z.object({
   entrapment: entrapmentDetailsResponseSchema.nullable(),
   assignee: z.string().nullable(),
   scheduledOn: isoDateSchema.nullable(),
+  dueOn: isoDateSchema.nullable(),
 }) satisfies z.ZodType<WorkOrder>;
 
 /**

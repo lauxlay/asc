@@ -50,6 +50,9 @@ export const workOrderSchema = z.object({
   // simplement non planifié, ce qui est exactement son état (ADR-002).
   assignee: z.string().min(1).nullable().default(null),
   scheduledOn: isoDateSchema.nullable().default(null),
+  // Ajouté au lot L1.8 : un OT existant n'a pas d'échéance réglementaire, ce
+  // qui est exactement son état (ADR-002).
+  dueOn: isoDateSchema.nullable().default(null),
 }) satisfies z.ZodType<WorkOrder>;
 
 /**

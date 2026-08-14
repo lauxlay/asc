@@ -72,7 +72,9 @@ describe("scheduleVisits", () => {
   });
 
   it("ne produit rien quand le contrat se termine avant la première échéance", () => {
-    expect(scheduleVisits(makeContract({ endsOn: isoDate("2026-01-15") }), TODAY)).toStrictEqual([]);
+    expect(scheduleVisits(makeContract({ endsOn: isoDate("2026-01-15") }), TODAY)).toStrictEqual(
+      [],
+    );
   });
 
   it("ignore le passé et reprend à la prochaine échéance à venir", () => {
@@ -105,8 +107,9 @@ describe("scheduleVisits", () => {
   it("produit une série par appareil couvert", () => {
     const visits = scheduleVisits(makeContract({ unitIds: ["unit-1", "unit-2", "unit-3"] }), TODAY);
 
-    expect(visits.filter((visit) => visit.dueOn === "2026-02-05").map((visit) => visit.unitId)).
-      toStrictEqual(["unit-1", "unit-2", "unit-3"]);
+    expect(
+      visits.filter((visit) => visit.dueOn === "2026-02-05").map((visit) => visit.unitId),
+    ).toStrictEqual(["unit-1", "unit-2", "unit-3"]);
     expect(visits).toHaveLength(30);
   });
 
@@ -127,7 +130,10 @@ describe("scheduleVisits", () => {
   });
 
   it("traverse une année bissextile sans décaler la cadence", () => {
-    const visits = scheduleVisits(makeContract({ startsOn: isoDate("2028-01-25") }), isoDate("2028-01-25"));
+    const visits = scheduleVisits(
+      makeContract({ startsOn: isoDate("2028-01-25") }),
+      isoDate("2028-01-25"),
+    );
 
     // 25 janvier + 35 jours = 29 février, qui existe en 2028.
     expect(visits[0]?.dueOn).toBe("2028-02-29");

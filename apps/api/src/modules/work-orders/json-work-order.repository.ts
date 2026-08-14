@@ -31,6 +31,33 @@ export class JsonWorkOrderRepository implements WorkOrderRepository {
     return workOrder;
   }
 
+  /**
+   * Un seul rang réservé pour tout le lot, une seule écriture de la collection.
+   *
+   * Tous les OT d'un lot portent la même année de signalement — ils sont créés
+   * dans la même seconde — d'où un unique appel à la séquence.
+   */
+  async createMany(drafts: readonly WorkOrderDraft[]): Promise<readonly WorkOrder[]> {
+    const [first] = drafts;
+    if (first === undefined) {
+      return [];
+    }
+
+    const year = yearOf(first.reportedAt);
+    const from = await this.#claimSequenceRange(first.tenantId, year, drafts.length);
+    const created = drafts.map((draft, index) => ({
+      ...draft,
+      reference: formatWorkOrderReference(year, from + index),
+    }));
+
+    await this.#store.update(
+      { tenantId: first.tenantId, collection: COLLECTION },
+      workOrderSchema,
+      (workOrders) => [...workOrders, ...created],
+    );
+    return created;
+  }
+
   async findById(tenantId: Id, id: Id): Promise<WorkOrder | null> {
     const workOrders = await this.#insertionOrder(tenantId);
     return workOrders.find((workOrder) => workOrder.id === id) ?? null;
@@ -84,6 +111,17 @@ export class JsonWorkOrderRepository implements WorkOrderRepository {
    * conséquence ; un numéro attribué deux fois ne l'est pas.
    */
   async #claimSequence(tenantId: Id, year: number): Promise<number> {
+    return this.#claimSequenceRange(tenantId, year, 1);
+  }
+
+  /**
+   * Réserve `count` rangs consécutifs, en une seule prise du verrou.
+   *
+   * Réserver un par un laisserait une autre requête s'intercaler au milieu du
+   * lot : les références d'une même génération ne seraient plus contiguës, et
+   * on perdrait la seule chose qui les rend lisibles à l'écran.
+   */
+  async #claimSequenceRange(tenantId: Id, year: number, count: number): Promise<number> {
     const id = String(year);
     let claimed = 1;
 
@@ -93,7 +131,7 @@ export class JsonWorkOrderRepository implements WorkOrderRepository {
       (rows) => {
         const current = rows.find((row) => row.id === id);
         claimed = current?.next ?? 1;
-        const updated = { id, tenantId, next: claimed + 1 };
+        const updated = { id, tenantId, next: claimed + count };
         return current === undefined
           ? [...rows, updated]
           : rows.map((row) => (row.id === id ? updated : row));

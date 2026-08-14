@@ -25,17 +25,31 @@ export class InMemoryWorkOrderRepository implements WorkOrderRepository {
   }
 
   async create(draft: WorkOrderDraft): Promise<WorkOrder> {
-    const year = yearOf(draft.reportedAt);
-    const sequenceKey = `${draft.tenantId} ${year}`;
-    const claimed = this.#sequences.get(sequenceKey) ?? 1;
-    this.#sequences.set(sequenceKey, claimed + 1);
+    const [created] = await this.createMany([draft]);
+    // `createMany` d'un seul brouillon rend toujours un OT.
+    return created as WorkOrder;
+  }
 
-    const workOrder: WorkOrder = {
+  /** Rangs consécutifs réservés d'un coup, comme l'adaptateur JSON. */
+  async createMany(drafts: readonly WorkOrderDraft[]): Promise<readonly WorkOrder[]> {
+    const [first] = drafts;
+    if (first === undefined) {
+      return [];
+    }
+
+    const year = yearOf(first.reportedAt);
+    const sequenceKey = `${first.tenantId} ${year}`;
+    const from = this.#sequences.get(sequenceKey) ?? 1;
+    this.#sequences.set(sequenceKey, from + drafts.length);
+
+    const created = drafts.map((draft, index) => ({
       ...draft,
-      reference: formatWorkOrderReference(year, claimed),
-    };
-    await this.save(workOrder);
-    return workOrder;
+      reference: formatWorkOrderReference(year, from + index),
+    }));
+    for (const workOrder of created) {
+      await this.save(workOrder);
+    }
+    return created;
   }
 
   async findById(tenantId: Id, id: Id): Promise<WorkOrder | null> {

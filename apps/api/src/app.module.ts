@@ -24,6 +24,7 @@ import { JsonContactRepository } from "./modules/contacts/json-contact.repositor
 import { ContractsController } from "./modules/contracts/contracts.controller.js";
 import { ContractsService } from "./modules/contracts/contracts.service.js";
 import { JsonContractRepository } from "./modules/contracts/json-contract.repository.js";
+import { VisitGenerationService } from "./modules/contracts/visit-generation.service.js";
 import { CustomersController } from "./modules/customers/customers.controller.js";
 import { CustomersService } from "./modules/customers/customers.service.js";
 import { JsonCustomerRepository } from "./modules/customers/json-customer.repository.js";
@@ -130,6 +131,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
       SitesService,
       UnitsService,
       UsersService,
+      VisitGenerationService,
       WorkOrdersService,
       { provide: APP_GUARD, useClass: JwtAuthGuard },
       { provide: APP_FILTER, useClass: DomainExceptionFilter },

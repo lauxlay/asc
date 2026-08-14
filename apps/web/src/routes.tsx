@@ -6,6 +6,7 @@ import {
   Outlet,
   redirect,
 } from "@tanstack/react-router";
+import { CommandPalette } from "@/components/command-palette";
 import { OfflineBanner } from "@/components/offline-banner";
 import { PwaUpdatePrompt } from "@/components/pwa-update-prompt";
 import { getSession, signOut, useSession } from "@/lib/auth";
@@ -134,6 +135,9 @@ function AuthenticatedLayout(): React.JSX.Element {
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
         <Outlet />
       </main>
+      {/* Montée sous la garde d'authentification : elle cherche dans le tenant
+          de la session, elle n'a rien à faire sur l'écran de connexion. */}
+      <CommandPalette />
     </>
   );
 }

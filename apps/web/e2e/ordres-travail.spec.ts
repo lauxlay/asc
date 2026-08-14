@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { signIn } from "./support/session";
+import { openParc, signInToApp } from "./support/session";
 
 /**
  * Saisie d'un ordre de travail (lot L1.6, spec 007).
@@ -19,9 +19,8 @@ import { signIn } from "./support/session";
  */
 
 async function openApp(page: Page): Promise<void> {
-  await page.goto("/login");
-  await signIn(page);
-  await expect(page.getByRole("heading", { name: "Parc" })).toBeVisible();
+  await signInToApp(page);
+  await openParc(page);
 }
 
 /** Crée un immeuble et ses appareils depuis l'écran de parc. */

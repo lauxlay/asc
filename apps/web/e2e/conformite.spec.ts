@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { signIn } from "./support/session";
+import { openParc, signInToApp } from "./support/session";
 
 /**
  * Tableau de conformité du parc (lot L1.5, spec 006).
@@ -22,9 +22,8 @@ function daysFromToday(offset: number): string {
 }
 
 async function openApp(page: Page): Promise<void> {
-  await page.goto("/login");
-  await signIn(page);
-  await expect(page.getByRole("heading", { name: "Parc" })).toBeVisible();
+  await signInToApp(page);
+  await openParc(page);
 }
 
 /** Crée un immeuble et ses appareils depuis l'écran de parc. */

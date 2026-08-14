@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { signIn } from "./support/session";
+import { openParc, signInToApp } from "./support/session";
 
 /**
  * Parcours client du dispatcher (lot L1.2, spec 003).
@@ -13,9 +13,7 @@ import { signIn } from "./support/session";
  */
 
 async function openClients(page: Page): Promise<void> {
-  await page.goto("/login");
-  await signIn(page);
-  await expect(page.getByRole("heading", { name: "Parc" })).toBeVisible();
+  await signInToApp(page);
   await page.getByRole("link", { name: "Clients" }).click();
   await expect(page.getByRole("heading", { name: "Clients" })).toBeVisible();
 }
@@ -138,9 +136,8 @@ test("un immeuble détaché redevient disponible pour un autre client", async ({
 
 test("le parc affiche un immeuble sans client sans se casser", async ({ page }) => {
   // Régression L1.1 : `customerId` est nullable, l'écran doit rester lisible.
-  await page.goto("/login");
-  await signIn(page);
-  await expect(page.getByRole("heading", { name: "Parc" })).toBeVisible();
+  await signInToApp(page);
+  await openParc(page);
 
   await page.getByLabel("Rechercher une adresse").fill("avenue de la Gare");
   await page.getByText("Le Clos Fleuri").click();

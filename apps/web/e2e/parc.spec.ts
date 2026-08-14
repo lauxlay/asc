@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { signIn } from "./support/session";
+import { openParc, signInToApp } from "./support/session";
 
 /**
  * Parcours de parc du dispatcher (lot L1.1, spec 002).
@@ -21,10 +21,9 @@ const NOUVEAU_SITE = {
   city: "Nantes",
 } as const;
 
-async function openParc(page: Page): Promise<void> {
-  await page.goto("/login");
-  await signIn(page);
-  await expect(page.getByRole("heading", { name: "Parc" })).toBeVisible();
+async function openParcPage(page: Page): Promise<void> {
+  await signInToApp(page);
+  await openParc(page);
 }
 
 async function createSite(page: Page, site: typeof NOUVEAU_SITE): Promise<void> {
@@ -40,7 +39,7 @@ async function createSite(page: Page, site: typeof NOUVEAU_SITE): Promise<void> 
 test("le dispatcher crée un site, y ajoute un appareil et le retrouve par son adresse", async ({
   page,
 }) => {
-  await openParc(page);
+  await openParcPage(page);
 
   // 1. Saisie du nouvel immeuble.
   await createSite(page, NOUVEAU_SITE);
@@ -76,7 +75,7 @@ test("le dispatcher crée un site, y ajoute un appareil et le retrouve par son a
 });
 
 test("la recherche ignore la casse et les accents de l'adresse", async ({ page }) => {
-  await openParc(page);
+  await openParcPage(page);
 
   // « Résidence Les Tilleuls » vient du jeu de démonstration. On le cherche en
   // majuscules et sans accent : la requête doit quand même le trouver.
@@ -90,7 +89,7 @@ test("la recherche ignore la casse et les accents de l'adresse", async ({ page }
 });
 
 test("une adresse inconnue laisse le parc vide, sans erreur", async ({ page }) => {
-  await openParc(page);
+  await openParcPage(page);
 
   await page.getByLabel("Rechercher une adresse").fill("bordeaux");
 
@@ -99,7 +98,7 @@ test("une adresse inconnue laisse le parc vide, sans erreur", async ({ page }) =
 });
 
 test("vider la recherche rend tout le parc", async ({ page }) => {
-  await openParc(page);
+  await openParcPage(page);
 
   const search = page.getByLabel("Rechercher une adresse");
   await search.fill("bordeaux");

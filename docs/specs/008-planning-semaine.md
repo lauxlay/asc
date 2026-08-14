@@ -70,7 +70,7 @@ Et un statut de plus : **`assigned`**, entre `new` et `in_progress`.
 4. Le mot de passe initial est **choisi par l'administrateur et transmis hors de l'outil**. Aucun envoi d'e-mail, aucun lien d'invitation, aucune obligation de changement à la première connexion — tout cela demande un service d'e-mail que la Phase 0 n'a pas.
 5. Longueur minimale du mot de passe : **12 caractères**. Aucune autre règle de composition (recommandation ANSSI : la longueur, pas les symboles obligatoires).
 6. Le mot de passe n'est **jamais rendu** par l'API, ni en clair ni haché, sur aucune réponse.
-7. L'email est **unique dans le tenant**, insensible à la casse. Un doublon est refusé (`409`).
+7. L'email est **unique dans le tenant**, insensible à la casse. Un doublon est refusé (`409`). L'unicité est tranchée par l'**adaptateur**, dans la même opération que l'écriture — même raison que la numérotation des OT (spec 007, R6.3) : un « je vérifie puis j'écris » côté service laisse deux créations simultanées passer toutes les deux, et deux comptes du même email, c'est une identité de connexion qui en désigne deux.
 8. **On ne peut pas se désactiver soi-même** : c'est la seule façon de se verrouiller dehors sans recours en Phase 0.
 9. Un utilisateur désactivé qui tente de se connecter reçoit **exactement la même erreur** qu'un mot de passe faux. Rien ne doit permettre d'énumérer les comptes, ni de distinguer « compte désactivé » de « compte inexistant ».
 10. **Pas de contrôle de rôle sur ces endpoints** : tout utilisateur authentifié du tenant peut gérer les utilisateurs. Voir la note ci-dessous — c'est un écart assumé, pas un oubli.
@@ -136,7 +136,7 @@ Et un statut de plus : **`assigned`**, entre `new` et `in_progress`.
 
 - [ ] Les transitions incluant `assigned` et l'invariant de R4.3 sont des **fonctions pures de `packages/domain`**, testées sur toutes les paires de statuts et sur les combinaisons mixtes de R2.3.
 - [ ] Le calcul des jours d'une semaine et l'ordre du backlog (R5.4) sont purs et testés, **changement d'heure et passage d'année compris**.
-- [ ] `UserRepository` gagne `findAll` ; sa **suite de contrat** couvre les deux nouveaux champs, l'unicité d'email insensible à la casse et l'isolation des tenants, et tourne **contre les deux adaptateurs**.
+- [ ] `UserRepository` gagne `findAll` et `createIfEmailFree` ; sa **suite de contrat** couvre les deux nouveaux champs, l'unicité d'email insensible à la casse — **y compris sur vingt créations simultanées** — et l'isolation des tenants, et tourne **contre les deux adaptateurs**.
 - [ ] Défauts de persistance en place pour `name`, `active`, `assignee`, `scheduledOn`, et **un cas par champ dans `legacy-records.test.ts`**.
 - [ ] R1 couverte côté API : création, doublon d'email refusé, mot de passe jamais rendu, auto-désactivation refusée, connexion d'un compte désactivé refusée avec le message générique.
 - [ ] R2, R4 et R8 couvertes : affectation mixte refusée, utilisateur inactif refusé, désaffectation d'un OT commencé refusée, statut recalculé dans les deux sens.

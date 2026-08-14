@@ -12,6 +12,7 @@ import {
   SITE_REPOSITORY,
   UNIT_REPOSITORY,
   USER_REPOSITORY,
+  WORK_ORDER_REPOSITORY,
 } from "./common/tokens.js";
 import { API_CONFIG, type ApiConfig } from "./config/env.js";
 import { HealthController } from "./health/health.controller.js";
@@ -35,6 +36,9 @@ import { JsonUnitRepository } from "./modules/units/json-unit.repository.js";
 import { UnitsController } from "./modules/units/units.controller.js";
 import { UnitsService } from "./modules/units/units.service.js";
 import { JsonUserRepository } from "./modules/users/json-user.repository.js";
+import { JsonWorkOrderRepository } from "./modules/work-orders/json-work-order.repository.js";
+import { WorkOrdersController } from "./modules/work-orders/work-orders.controller.js";
+import { WorkOrdersService } from "./modules/work-orders/work-orders.service.js";
 import { JsonCollectionStore } from "./storage/json-collection-store.js";
 
 /**
@@ -67,6 +71,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
       ParcImportController,
       SitesController,
       UnitsController,
+      WorkOrdersController,
     ],
     providers: [
       { provide: API_CONFIG, useValue: config },
@@ -104,6 +109,11 @@ export function createAppModule(config: ApiConfig): DynamicModule {
         useFactory: (store: JsonCollectionStore) => new JsonUserRepository(store),
         inject: [JsonCollectionStore],
       },
+      {
+        provide: WORK_ORDER_REPOSITORY,
+        useFactory: (store: JsonCollectionStore) => new JsonWorkOrderRepository(store),
+        inject: [JsonCollectionStore],
+      },
       AuthService,
       ComplianceService,
       ContactsService,
@@ -112,6 +122,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
       ParcImportService,
       SitesService,
       UnitsService,
+      WorkOrdersService,
       { provide: APP_GUARD, useClass: JwtAuthGuard },
       { provide: APP_FILTER, useClass: DomainExceptionFilter },
     ],

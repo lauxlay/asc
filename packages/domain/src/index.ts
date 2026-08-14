@@ -47,6 +47,7 @@ export {
   CUSTOMER_TYPES,
   type Customer,
   type CustomerType,
+  type EntrapmentDetails,
   type Id,
   type MaintenanceVisit,
   type Site,
@@ -54,6 +55,13 @@ export {
   USER_ROLES,
   type User,
   type UserRole,
+  WORK_ORDER_PRIORITIES,
+  WORK_ORDER_STATUSES,
+  WORK_ORDER_TYPES,
+  type WorkOrder,
+  type WorkOrderPriority,
+  type WorkOrderStatus,
+  type WorkOrderType,
 } from "./entities.js";
 export { DomainError } from "./errors.js";
 export {
@@ -75,3 +83,14 @@ export {
   siteKeyOf,
 } from "./import/import-plan.js";
 export { normalizeSearchText, siteMatchesQuery } from "./sites/site-search.js";
+export {
+  followedUpBy,
+  followUpChainOf,
+  wouldCreateFollowUpCycle,
+} from "./work-orders/follow-up.js";
+export {
+  allowedTransitionsFrom,
+  canTransition,
+  formatWorkOrderReference,
+  isTerminalStatus,
+} from "./work-orders/status-transitions.js";

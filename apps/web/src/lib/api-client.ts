@@ -14,6 +14,7 @@ import {
   type CreateCustomerRequest,
   type CreateSiteRequest,
   type CreateUnitRequest,
+  type CreateWorkOrderRequest,
   type CustomerListResponse,
   type CustomerResponse,
   commitImportResponseSchema,
@@ -36,8 +37,16 @@ import {
   siteResponseSchema,
   type UnitListResponse,
   type UnitResponse,
+  type UpdateWorkOrderRequest,
   unitListResponseSchema,
   unitResponseSchema,
+  type WorkOrderChainResponse,
+  type WorkOrderListQuery,
+  type WorkOrderListResponse,
+  type WorkOrderResponse,
+  workOrderChainResponseSchema,
+  workOrderListResponseSchema,
+  workOrderResponseSchema,
 } from "@asc/contracts";
 import type { ColumnMapping } from "@asc/domain";
 import { type ZodType, z } from "zod";
@@ -205,6 +214,18 @@ export function createContact(
   return request("/contacts", contactResponseSchema, { method: "POST", body: contact, token });
 }
 
+/**
+ * Contacts rattachés à un immeuble — le gardien, typiquement.
+ *
+ * C'est ce qui pré-remplit le contact sur place d'un OT (spec 007, R1.2) : le
+ * modèle contact→immeubles du lot L1.2 sert enfin.
+ */
+export function listContactsOfSite(token: string, siteId: string): Promise<ContactListResponse> {
+  return request(`/contacts?siteId=${encodeURIComponent(siteId)}`, contactListResponseSchema, {
+    token,
+  });
+}
+
 export function getSite(token: string, siteId: string): Promise<SiteResponse> {
   return request(`/sites/${encodeURIComponent(siteId)}`, siteResponseSchema, { token });
 }
@@ -265,6 +286,66 @@ export function listContractDeadlines(
     complianceDeadlineListResponseSchema,
     { token },
   );
+}
+
+/**
+ * OT du tenant, du plus récent au plus ancien.
+ *
+ * `open: "true"` rend les OT encore à traiter : c'est ce dont l'écran de saisie
+ * a besoin pour détecter un doublon avant de proposer un formulaire (spec 007,
+ * R2.1).
+ */
+export function listWorkOrders(
+  token: string,
+  query: WorkOrderListQuery = {},
+): Promise<WorkOrderListResponse> {
+  const search = new URLSearchParams(
+    Object.entries(query).filter(([, value]) => value !== undefined) as [string, string][],
+  ).toString();
+  return request(`/work-orders${search === "" ? "" : `?${search}`}`, workOrderListResponseSchema, {
+    token,
+  });
+}
+
+export function getWorkOrder(token: string, id: string): Promise<WorkOrderResponse> {
+  return request(`/work-orders/${encodeURIComponent(id)}`, workOrderResponseSchema, { token });
+}
+
+export function getWorkOrderChain(token: string, id: string): Promise<WorkOrderChainResponse> {
+  return request(`/work-orders/${encodeURIComponent(id)}/chain`, workOrderChainResponseSchema, {
+    token,
+  });
+}
+
+export function createWorkOrder(
+  token: string,
+  workOrder: CreateWorkOrderRequest,
+): Promise<WorkOrderResponse> {
+  return request("/work-orders", workOrderResponseSchema, {
+    method: "POST",
+    body: workOrder,
+    token,
+  });
+}
+
+export function updateWorkOrder(
+  token: string,
+  id: string,
+  changes: UpdateWorkOrderRequest,
+): Promise<WorkOrderResponse> {
+  return request(`/work-orders/${encodeURIComponent(id)}`, workOrderResponseSchema, {
+    method: "PATCH",
+    body: changes,
+    token,
+  });
+}
+
+/** Rattache un signalement de plus — sans créer d'OT (spec 007, R2.3). */
+export function attachWorkOrderReport(token: string, id: string): Promise<WorkOrderResponse> {
+  return request(`/work-orders/${encodeURIComponent(id)}/reports`, workOrderResponseSchema, {
+    method: "POST",
+    token,
+  });
 }
 
 /** Conformité du parc, calculée à chaque appel (spec 006, R7). */

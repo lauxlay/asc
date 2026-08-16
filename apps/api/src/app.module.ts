@@ -32,6 +32,8 @@ import { ParcImportController } from "./modules/parc-import/parc-import.controll
 import { ParcImportService } from "./modules/parc-import/parc-import.service.js";
 import { PlanningController } from "./modules/planning/planning.controller.js";
 import { PlanningService } from "./modules/planning/planning.service.js";
+import { SearchController } from "./modules/search/search.controller.js";
+import { SearchService } from "./modules/search/search.service.js";
 import { JsonSiteRepository } from "./modules/sites/json-site.repository.js";
 import { SitesController } from "./modules/sites/sites.controller.js";
 import { SitesService } from "./modules/sites/sites.service.js";
@@ -75,6 +77,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
       HealthController,
       ParcImportController,
       PlanningController,
+      SearchController,
       SitesController,
       UnitsController,
       UsersController,
@@ -128,6 +131,7 @@ export function createAppModule(config: ApiConfig): DynamicModule {
       CustomersService,
       ParcImportService,
       PlanningService,
+      SearchService,
       SitesService,
       UnitsService,
       UsersService,

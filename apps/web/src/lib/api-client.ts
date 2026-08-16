@@ -37,8 +37,10 @@ import {
   loginResponseSchema,
   type PlanningResponse,
   planningResponseSchema,
+  type SearchResponse,
   type SiteListResponse,
   type SiteResponse,
+  searchResponseSchema,
   siteListResponseSchema,
   siteResponseSchema,
   type UnitListResponse,
@@ -419,6 +421,16 @@ export function updateUser(
     body: changes,
     token,
   });
+}
+
+/**
+ * Recherche globale (spec 010).
+ *
+ * En dessous de deux caractères, le serveur rend une liste vide : le client
+ * n'a pas à connaître ce seuil, il envoie ce qui est tapé.
+ */
+export function search(token: string, query: string): Promise<SearchResponse> {
+  return request(`/search?q=${encodeURIComponent(query)}`, searchResponseSchema, { token });
 }
 
 /** Conformité du parc, calculée à chaque appel (spec 006, R7). */

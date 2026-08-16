@@ -99,6 +99,17 @@ export {
   planningRowSchema,
 } from "./planning.contract.js";
 export {
+  MIN_SEARCH_LENGTH,
+  type SearchKind,
+  type SearchQuery,
+  type SearchResponse,
+  type SearchResult,
+  searchKindSchema,
+  searchQuerySchema,
+  searchResponseSchema,
+  searchResultSchema,
+} from "./search.contract.js";
+export {
   type CreateSiteRequest,
   createSiteRequestSchema,
   type SiteListQuery,
